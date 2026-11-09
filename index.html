@@ -58,6 +58,89 @@
       padding: 0;
     }
 
+    /* Modal Architecture & Responsiveness (Fixes overflow and scroll bugs) */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      z-index: 9999;
+      overflow: hidden;
+    }
+    .modal-window {
+      background: #ffffff;
+      border-radius: 1.25rem;
+      width: 100%;
+      max-width: 52rem;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--slate-200);
+      overflow: hidden;
+      animation: modalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .modal-body-scrollable {
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      flex-grow: 1;
+      padding: 1.25rem;
+    }
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.96) translateY(8px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    /* Full Question & Answer Card (Zero truncation, responsive word wrap) */
+    .qa-card {
+      background-color: var(--slate-50);
+      border: 1px solid var(--slate-200);
+      border-radius: 0.875rem;
+      padding: 0.875rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      transition: all 0.15s ease-in-out;
+    }
+    .qa-card:hover {
+      border-color: #c7d2fe;
+      background-color: #f8fafc;
+    }
+    .qa-question {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #3730a3;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      line-height: 1.35;
+      word-break: break-word;
+      white-space: normal;
+    }
+    .qa-answer {
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--slate-800);
+      line-height: 1.5;
+      background: #ffffff;
+      border: 1px solid var(--slate-200);
+      border-radius: 0.625rem;
+      padding: 0.625rem 0.75rem;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+
+    /* Filters responsive sizing */
+    .filter-item {
+      flex: 1 1 150px;
+      min-width: 135px;
+    }
+
     /* Slate & Modern Neutral Colors */
     .bg-slate-50 { background-color: var(--slate-50) !important; }
     .bg-slate-100 { background-color: var(--slate-100) !important; }
@@ -84,75 +167,34 @@
     .bg-indigo-100 { background-color: #e0e7ff !important; }
     .bg-indigo-600 { background-color: #4f46e5 !important; }
     .bg-indigo-700 { background-color: #4338ca !important; }
-    .bg-indigo-900\/10 { background-color: rgba(49, 46, 129, 0.06) !important; }
-    .bg-indigo-950\/60 { background-color: rgba(30, 27, 75, 0.8) !important; }
-    .bg-indigo-500\/20 { background-color: rgba(99, 102, 241, 0.2) !important; }
-    .text-indigo-300 { color: #a5b4fc !important; }
     .text-indigo-600 { color: #4f46e5 !important; }
     .text-indigo-700 { color: #4338ca !important; }
     .text-indigo-800 { color: #3730a3 !important; }
     .border-indigo-100 { border-color: #e0e7ff !important; }
     .border-indigo-200 { border-color: #c7d2fe !important; }
-    .border-indigo-500\/30 { border-color: rgba(99, 102, 241, 0.3) !important; }
-    .border-indigo-500\/40 { border-color: rgba(99, 102, 241, 0.4) !important; }
 
     .bg-emerald-50 { background-color: var(--emerald-50) !important; }
     .bg-emerald-100 { background-color: var(--emerald-100) !important; }
     .bg-emerald-400 { background-color: #34d399 !important; }
     .bg-emerald-500 { background-color: var(--emerald-500) !important; }
     .bg-emerald-600 { background-color: var(--emerald-600) !important; }
-    .bg-emerald-950\/60 { background-color: rgba(6, 78, 59, 0.8) !important; }
-    .bg-emerald-50\/40 { background-color: rgba(236, 253, 245, 0.5) !important; }
-    .text-emerald-300 { color: #6ee7b7 !important; }
-    .text-emerald-400 { color: #34d399 !important; }
-    .text-emerald-500 { color: var(--emerald-500) !important; }
     .text-emerald-600 { color: var(--emerald-600) !important; }
     .text-emerald-700 { color: var(--emerald-700) !important; }
     .text-emerald-800 { color: var(--emerald-800) !important; }
     .border-emerald-100 { border-color: var(--emerald-100) !important; }
     .border-emerald-200 { border-color: #a7f3d0 !important; }
-    .border-emerald-500\/40 { border-color: rgba(16, 185, 129, 0.4) !important; }
 
     .bg-rose-50 { background-color: var(--rose-50) !important; }
     .bg-rose-100 { background-color: var(--rose-100) !important; }
     .bg-rose-400 { background-color: var(--rose-400) !important; }
     .bg-rose-500 { background-color: var(--rose-500) !important; }
     .bg-rose-600 { background-color: var(--rose-600) !important; }
-    .bg-rose-50\/40 { background-color: rgba(255, 241, 242, 0.5) !important; }
-    .text-rose-400 { color: var(--rose-400) !important; }
     .text-rose-500 { color: var(--rose-500) !important; }
     .text-rose-600 { color: var(--rose-600) !important; }
     .text-rose-700 { color: var(--rose-700) !important; }
     .text-rose-800 { color: var(--rose-800) !important; }
     .border-rose-100 { border-color: var(--rose-100) !important; }
     .border-rose-200 { border-color: #fecdd3 !important; }
-
-    /* Modern Border Radii */
-    .rounded-xl { border-radius: 0.75rem !important; }
-    .rounded-2xl { border-radius: 1rem !important; }
-    .rounded-full { border-radius: 9999px !important; }
-
-    /* Flex & Gap Helpers */
-    .gap-1 { gap: 0.25rem !important; }
-    .gap-1\.5 { gap: 0.375rem !important; }
-    .gap-2 { gap: 0.5rem !important; }
-    .gap-2\.5 { gap: 0.625rem !important; }
-    .gap-3 { gap: 0.75rem !important; }
-    .gap-4 { gap: 1rem !important; }
-    .gap-6 { gap: 1.5rem !important; }
-
-    /* Sizing & Dimension helpers */
-    .w-7 { width: 1.75rem !important; }
-    .h-7 { height: 1.75rem !important; }
-    .w-9 { width: 2.25rem !important; }
-    .h-9 { height: 2.25rem !important; }
-    .w-10 { width: 2.5rem !important; }
-    .h-10 { height: 2.5rem !important; }
-    .w-16 { width: 4rem !important; }
-    .h-16 { height: 4rem !important; }
-
-    .text-\[10px\] { font-size: 10px !important; line-height: 14px !important; }
-    .text-\[11px\] { font-size: 11px !important; line-height: 15px !important; }
 
     /* Custom scrollbars */
     ::-webkit-scrollbar {
@@ -290,10 +332,10 @@
           </button>
         </div>
 
-        <!-- Dropdown Filters Row -->
-        <div class="flex flex-wrap items-center gap-2 sm:gap-2.5">
+        <!-- Dropdown Filters Row (Fully Responsive) -->
+        <div class="flex flex-wrap items-center gap-2 sm:gap-2.5 w-full lg:w-auto">
           <!-- Class Filter -->
-          <div class="relative min-w-[140px]">
+          <div class="relative filter-item">
             <select id="classFilter" onchange="app.onFilterChange()" class="w-full appearance-none bg-slate-50 border border-slate-300 text-slate-700 text-xs font-semibold py-2 px-3 pr-8 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
               <option value="ALL">All Classes</option>
             </select>
@@ -301,7 +343,7 @@
           </div>
 
           <!-- Status Filter -->
-          <div class="relative min-w-[150px]">
+          <div class="relative filter-item">
             <select id="statusFilter" onchange="app.onFilterChange()" class="w-full appearance-none bg-slate-50 border border-slate-300 text-slate-700 text-xs font-semibold py-2 px-3 pr-8 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
               <option value="ALL">All Call Statuses</option>
               <option value="ATTENDED">Attended Only</option>
@@ -311,7 +353,7 @@
           </div>
 
           <!-- Reason Filter (Dynamic) -->
-          <div class="relative min-w-[160px]">
+          <div class="relative filter-item">
             <select id="reasonFilter" onchange="app.onFilterChange()" class="w-full appearance-none bg-slate-50 border border-slate-300 text-slate-700 text-xs font-semibold py-2 px-3 pr-8 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
               <option value="ALL">All Non-Attended Reasons</option>
             </select>
@@ -319,7 +361,7 @@
           </div>
 
           <!-- 7-Person Target Status Filter -->
-          <div class="relative min-w-[150px]">
+          <div class="relative filter-item">
             <select id="targetFilter" onchange="app.onFilterChange()" class="w-full appearance-none bg-slate-50 border border-slate-300 text-slate-700 text-xs font-semibold py-2 px-3 pr-8 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
               <option value="ALL">All Student Targets</option>
               <option value="COMPLETE">Target Achieved (7/7)</option>
@@ -330,7 +372,7 @@
           </div>
 
           <!-- Reset Filter Button -->
-          <button onclick="app.resetAllFilters()" title="Reset all filters" class="px-3 py-2 rounded-xl text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 text-xs font-semibold transition">
+          <button onclick="app.resetAllFilters()" title="Reset all filters" class="px-3.5 py-2 rounded-xl text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 text-xs font-semibold transition flex-shrink-0">
             <i class="fa-solid fa-rotate-left mr-1"></i> Reset
           </button>
         </div>
@@ -615,38 +657,41 @@
             <!-- Dynamic pagination buttons -->
           </div>
         </div>
-
       </div>
     </div>
-
   </main>
 
-  <!-- ================= DETAIL MODAL ================= -->
-  <div id="detailModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden">
-    <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-scaleUp">
+  <!-- ================= DETAIL MODAL (SCROLLABLE, CLICK-OUTSIDE TO CLOSE, FULL DATA DISPLAY) ================= -->
+  <div id="detailModal" class="modal-backdrop hidden" onclick="if(event.target === this) app.closeDetailModal()">
+    <div class="modal-window">
       
-      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-        <div class="flex items-center gap-2.5">
-          <div id="modalStatusIcon" class="w-9 h-9 rounded-xl flex items-center justify-center text-white bg-indigo-600">
+      <!-- Modal Header (Fixed Top) -->
+      <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-white flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <div id="modalStatusIcon" class="w-10 h-10 rounded-xl flex items-center justify-center text-white bg-indigo-600 flex-shrink-0 shadow-sm">
             <i class="fa-solid fa-phone"></i>
           </div>
           <div>
-            <h3 id="modalTitle" class="font-bold text-slate-900 text-base">Record Details</h3>
-            <p id="modalSubtitle" class="text-xs text-slate-400">Call Entry Inspection</p>
+            <h3 id="modalTitle" class="font-extrabold text-slate-900 text-base leading-tight">Record Details</h3>
+            <p id="modalSubtitle" class="text-xs text-slate-400 mt-0.5">Call Entry Inspection</p>
           </div>
         </div>
-        <button onclick="app.closeDetailModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center">
-          <i class="fa-solid fa-xmark"></i>
+        <!-- Prominent Top Close Button -->
+        <button type="button" onclick="app.closeDetailModal()" class="w-9 h-9 rounded-xl bg-slate-100 text-slate-500 hover:text-slate-900 hover:bg-slate-200 flex items-center justify-center transition active:scale-95" title="Close (Esc)">
+          <i class="fa-solid fa-xmark text-base"></i>
         </button>
       </div>
 
-      <div id="modalBody" class="space-y-3 text-xs">
+      <!-- Modal Body (Fully Scrollable, Questions & Answers fully readable) -->
+      <div id="modalBody" class="modal-body-scrollable space-y-4">
         <!-- Dynamically rendered -->
       </div>
 
-      <div class="pt-3 border-t border-slate-100 flex justify-end">
-        <button onclick="app.closeDetailModal()" class="px-4 py-2 rounded-xl bg-slate-900 text-white font-semibold text-xs hover:bg-slate-800 transition">
-          Close
+      <!-- Modal Footer (Fixed Bottom) -->
+      <div class="px-5 py-3.5 border-t border-slate-100 bg-slate-50 flex items-center justify-between flex-shrink-0 text-xs">
+        <span class="text-slate-400 font-medium">Click outside or press <kbd class="px-1.5 py-0.5 rounded bg-slate-200 text-slate-700 text-[10px] font-mono">Esc</kbd> to close</span>
+        <button type="button" onclick="app.closeDetailModal()" class="px-5 py-2 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 transition active:scale-95 shadow-sm">
+          Close Window
         </button>
       </div>
 
@@ -654,29 +699,32 @@
   </div>
 
   <!-- ================= STUDENT DOSSIER MODAL ================= -->
-  <div id="studentModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden">
-    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] flex flex-col">
+  <div id="studentModal" class="modal-backdrop hidden" onclick="if(event.target === this) app.closeStudentModal()">
+    <div class="modal-window">
       
-      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-white flex-shrink-0">
         <div>
           <div class="flex items-center gap-2">
             <h3 id="studentModalName" class="font-bold text-slate-900 text-lg">Student Name</h3>
-            <span id="studentModalClass" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">Class</span>
+            <span id="studentModalClass" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-700">Class</span>
           </div>
           <p class="text-xs text-slate-400 mt-0.5">Assigned 7 Contacts Call Tracker</p>
         </div>
-        <button onclick="app.closeStudentModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center">
-          <i class="fa-solid fa-xmark"></i>
+        <button type="button" onclick="app.closeStudentModal()" class="w-9 h-9 rounded-xl bg-slate-100 text-slate-500 hover:text-slate-900 hover:bg-slate-200 flex items-center justify-center transition active:scale-95" title="Close (Esc)">
+          <i class="fa-solid fa-xmark text-base"></i>
         </button>
       </div>
 
-      <div id="studentModalContent" class="overflow-y-auto space-y-3 flex-grow pr-1">
+      <!-- Modal Body -->
+      <div id="studentModalContent" class="modal-body-scrollable space-y-3">
         <!-- Dynamic contact list for this student -->
       </div>
 
-      <div class="pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
+      <!-- Modal Footer -->
+      <div class="px-5 py-3.5 border-t border-slate-100 bg-slate-50 flex justify-between items-center text-xs flex-shrink-0">
         <div id="studentModalSummary" class="text-slate-600 font-medium">Progress: 5 of 7 Completed</div>
-        <button onclick="app.closeStudentModal()" class="px-4 py-2 rounded-xl bg-slate-900 text-white font-semibold text-xs hover:bg-slate-800 transition">
+        <button type="button" onclick="app.closeStudentModal()" class="px-5 py-2 rounded-xl bg-slate-900 text-white font-semibold hover:bg-slate-800 transition active:scale-95 shadow-sm">
           Done
         </button>
       </div>
@@ -685,12 +733,12 @@
   </div>
 
   <!-- ================= SETTINGS & SHEET CONFIG MODAL ================= -->
-  <div id="settingsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden">
-    <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
+  <div id="settingsModal" class="modal-backdrop hidden" onclick="if(event.target === this) app.toggleSettingsModal(false)">
+    <div class="modal-window max-w-xl">
       
-      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-        <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-white flex-shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center">
             <i class="fa-solid fa-gear"></i>
           </div>
           <div>
@@ -698,12 +746,12 @@
             <p class="text-xs text-slate-400">Live endpoint & Auto-polling settings</p>
           </div>
         </div>
-        <button onclick="app.toggleSettingsModal(false)" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center">
-          <i class="fa-solid fa-xmark"></i>
+        <button type="button" onclick="app.toggleSettingsModal(false)" class="w-9 h-9 rounded-xl bg-slate-100 text-slate-500 hover:text-slate-900 hover:bg-slate-200 flex items-center justify-center transition active:scale-95" title="Close (Esc)">
+          <i class="fa-solid fa-xmark text-base"></i>
         </button>
       </div>
 
-      <div class="space-y-4 text-xs">
+      <div class="modal-body-scrollable space-y-4 text-xs">
         <div>
           <label class="block font-semibold text-slate-700 mb-1">Google Sheet ID</label>
           <input type="text" id="cfgSheetId" class="w-full p-2.5 rounded-xl border border-slate-300 font-mono text-xs focus:ring-2 focus:ring-indigo-500" value="1qBmDdIg6L8ioYK2iLkFSmliYcGIkIAgvUQUxjLQyfm4">
@@ -746,7 +794,7 @@
             </summary>
             <div class="mt-2 space-y-2">
               <textarea id="rawCsvPaste" rows="4" placeholder="Paste CSV rows here (Optional fallback)..." class="w-full p-2 border border-slate-300 rounded-xl font-mono text-[11px]"></textarea>
-              <button onclick="app.loadFromCustomCsv()" class="px-3 py-1.5 rounded-lg bg-slate-800 text-white font-medium text-xs">
+              <button type="button" onclick="app.loadFromCustomCsv()" class="px-3 py-1.5 rounded-lg bg-slate-800 text-white font-medium text-xs">
                 Parse & Apply Pasted CSV
               </button>
             </div>
@@ -754,15 +802,15 @@
         </div>
       </div>
 
-      <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
-        <button onclick="app.resetToDefaultSheet()" class="text-xs text-slate-500 hover:text-slate-800 font-medium">
+      <div class="px-5 py-3.5 border-t border-slate-100 bg-slate-50 flex items-center justify-between flex-shrink-0">
+        <button type="button" onclick="app.resetToDefaultSheet()" class="text-xs text-slate-500 hover:text-slate-800 font-medium">
           Restore Defaults
         </button>
         <div class="flex items-center gap-2">
-          <button onclick="app.toggleSettingsModal(false)" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-semibold hover:bg-slate-200">
+          <button type="button" onclick="app.toggleSettingsModal(false)" class="px-4 py-2 rounded-xl bg-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-300">
             Cancel
           </button>
-          <button onclick="app.saveSettingsAndReload()" class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700">
+          <button type="button" onclick="app.saveSettingsAndReload()" class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 shadow-sm">
             Save & Reconnect
           </button>
         </div>
@@ -846,420 +894,439 @@
             this.toggleSettingsModal(false);
           }
         });
+
+        // Click outside backdrop to close
+        ['detailModal', 'studentModal', 'settingsModal'].forEach(modalId => {
+          const el = document.getElementById(modalId);
+          if (el) {
+            el.addEventListener('click', (e) => {
+              if (e.target === el) {
+                if (modalId === 'detailModal') this.closeDetailModal();
+                if (modalId === 'studentModal') this.closeStudentModal();
+                if (modalId === 'settingsModal') this.toggleSettingsModal(false);
+              }
+            });
+          }
+        });
       }
 
-      showToast(message, type = 'success') {
-        const toast = document.getElementById('toastNotification');
-        const msg = document.getElementById('toastMsg');
-        const icon = document.getElementById('toastIcon');
-
-        if (!toast || !msg || !icon) return;
-
-        msg.textContent = message;
-        if (type === 'success') {
-          icon.className = 'fa-solid fa-circle-check text-emerald-400';
-        } else if (type === 'error') {
-          icon.className = 'fa-solid fa-triangle-exclamation text-rose-400';
-        } else {
-          icon.className = 'fa-solid fa-arrows-rotate text-indigo-400';
-        }
-
-        toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
-        setTimeout(() => {
-          toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
-        }, 3200);
-      }
-
-      // ================= DATA FETCHING ENGINE =================
-      async fetchGoogleSheetData(showIndicator = false) {
+      // ================= DATA FETCHING & PARSING METHODS =================
+      async fetchGoogleSheetData(isManual = false) {
         const refreshIcon = document.getElementById('refreshIcon');
-        const syncStatusText = document.getElementById('syncStatusText');
-        const syncStatusBadge = document.getElementById('syncStatusBadge');
+        if (refreshIcon) refreshIcon.classList.add('fa-spin');
 
-        if (showIndicator && refreshIcon) {
-          refreshIcon.classList.add('fa-spin');
-        }
+        const statusBadge = document.getElementById('syncStatusBadge');
+        const statusText = document.getElementById('syncStatusText');
+        const timeAgo = document.getElementById('syncTimeAgo');
 
-        if (syncStatusText) syncStatusText.textContent = 'Syncing...';
-        if (syncStatusBadge) {
-          syncStatusBadge.className = 'flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-950/60 border border-indigo-500/40 text-indigo-300 text-xs font-medium';
-        }
+        if (statusText) statusText.textContent = 'Syncing...';
 
-        // Google Visualization API endpoint:
-        // Supports public sheets with zero API keys and delivers structured columns & rows
-        const gvizUrl = `https://docs.google.com/spreadsheets/d/${this.sheetId}/gviz/tq?tqx=out:json&gid=${this.sheetGid}&tq=`;
-        const csvFallbackUrl = `https://docs.google.com/spreadsheets/d/${this.sheetId}/export?format=csv&gid=${this.sheetGid}`;
+        const gvizUrl = `https://docs.google.com/spreadsheets/d/${this.sheetId}/gviz/tq?tqx=out:json&gid=${this.sheetGid}&t=${Date.now()}`;
+        const csvUrl = `https://docs.google.com/spreadsheets/d/${this.sheetId}/gviz/tq?tqx=out:csv&gid=${this.sheetGid}&t=${Date.now()}`;
 
-        let parsedSuccessfully = false;
+        let fetchedSuccessfully = false;
 
         try {
-          // Attempt 1: GViz JSON endpoint
-          const response = await fetch(gvizUrl, { cache: 'no-store' });
-          if (response.ok) {
-            const rawText = await response.text();
-            // Google wraps response in: /*O_o*/ google.visualization.Query.setResponse({...});
-            const startIdx = rawText.indexOf('{');
-            const endIdx = rawText.lastIndexOf('}');
-            if (startIdx !== -1 && endIdx !== -1) {
-              const jsonStr = rawText.substring(startIdx, endIdx + 1);
-              const data = JSON.parse(jsonStr);
-              if (data && data.table) {
-                this.parseGVizData(data.table);
-                parsedSuccessfully = true;
-              }
-            }
+          const res = await fetch(gvizUrl);
+          if (res.ok) {
+            const text = await res.text();
+            fetchedSuccessfully = this.parseGVizResponse(text);
           }
         } catch (err) {
-          console.warn('GViz fetch failed, trying CSV fallback...', err);
+          console.warn('GViz fetch encounter, falling back to CSV endpoint...', err);
         }
 
-        // Attempt 2: Direct CSV export endpoint if GViz failed
-        if (!parsedSuccessfully) {
+        if (!fetchedSuccessfully) {
           try {
-            const csvResp = await fetch(csvFallbackUrl, { cache: 'no-store' });
-            if (csvResp.ok) {
-              const csvText = await csvResp.text();
-              this.parseCsvData(csvText);
-              parsedSuccessfully = true;
+            const resCsv = await fetch(csvUrl);
+            if (resCsv.ok) {
+              const csvText = await resCsv.text();
+              fetchedSuccessfully = this.parseCsvData(csvText);
             }
           } catch (csvErr) {
-            console.warn('CSV fetch also failed...', csvErr);
+            console.warn('Direct CSV fetch failed:', csvErr);
           }
         }
 
-        // Attempt 3: If both network calls failed (e.g., sheet is offline or requires browser login)
-        if (!parsedSuccessfully && this.rawRecords.length === 0) {
-          console.info('Loading simulated realistic campus dataset matching the requested schema...');
-          this.loadRealisticCampusMockData();
-          this.showToast('Using verified campus data model (Live Sheet protected or offline)', 'info');
-        } else if (parsedSuccessfully) {
-          this.showToast('Synchronized with Google Sheets live!', 'success');
-        }
+        if (refreshIcon) refreshIcon.classList.remove('fa-spin');
 
-        // Update timestamps & badges safely
-        this.lastSyncTime = new Date();
-        const syncTimeAgo = document.getElementById('syncTimeAgo');
-        if (syncTimeAgo) {
-          syncTimeAgo.textContent = this.lastSyncTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        }
-        if (syncStatusText) syncStatusText.textContent = 'Live Connected';
-        if (syncStatusBadge) {
-          syncStatusBadge.className = 'flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs font-medium';
-        }
+        if (fetchedSuccessfully && this.rawRecords.length > 0) {
+          this.lastSyncTime = new Date();
+          if (statusBadge) {
+            statusBadge.className = 'flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-950/60 border border-emerald-500/40 text-emerald-300 text-xs font-medium';
+          }
+          if (statusText) statusText.textContent = 'Live Connected';
+          if (timeAgo) timeAgo.textContent = 'Just now';
 
-        if (refreshIcon) {
-          refreshIcon.classList.remove('fa-spin');
-        }
+          this.populateFilterDropdowns();
+          this.applyFilters();
 
-        // Process data through filters, KPI calculations, and views
-        this.populateFilterDropdowns();
-        this.applyFilters();
+          if (isManual) {
+            this.showToast(`Synchronized ${this.rawRecords.length} records successfully`, 'success');
+          }
+        } else {
+          // If first run and fetch was blocked (e.g., sandbox CORS or offline), populate seed records so UI is immediately active
+          if (this.rawRecords.length === 0) {
+            this.loadSeedData();
+          }
+          if (statusBadge) {
+            statusBadge.className = 'flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-950/60 border border-amber-500/40 text-amber-300 text-xs font-medium';
+          }
+          if (statusText) statusText.textContent = 'Active (Offline / Seed)';
+          if (isManual) {
+            this.showToast('Unable to reach sheet directly. Showing current dataset.', 'warning');
+          }
+        }
       }
 
-      // GViz JSON parser
-      parseGVizData(table) {
-        if (!table.cols || !table.rows) return;
+      parseGVizResponse(text) {
+        try {
+          const match = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?/);
+          if (!match || !match[1]) return false;
+          const json = JSON.parse(match[1]);
+          if (!json.table || !json.table.cols || !json.table.rows) return false;
 
-        // Extract column labels
-        this.headers = table.cols.map((col, idx) => col.label ? col.label.trim() : `Col_${idx + 1}`);
-        this.detectColumnMapping(this.headers);
+          const headers = json.table.cols.map((col, idx) => col.label || col.id || `Column ${idx + 1}`);
+          this.mapColumns(headers);
 
-        const records = [];
-        table.rows.forEach((row, rowIndex) => {
-          if (!row || !row.c) return;
-          const values = row.c.map(cell => (cell && cell.v !== null && cell.v !== undefined) ? cell.v : '');
+          const records = [];
+          json.table.rows.forEach((r, rowIdx) => {
+            if (!r || !r.c) return;
+            const values = r.c.map(cell => (cell && cell.v !== null && cell.v !== undefined) ? String(cell.v).trim() : '');
+            if (values.every(v => v === '')) return;
+            records.push(this.createRecordFromRow(values, rowIdx));
+          });
 
-          // Check if row has at least one meaningful value
-          const hasData = values.some(v => String(v).trim().length > 0);
-          if (!hasData) return;
-
-          const record = this.normalizeRecord(values, rowIndex + 1);
-          records.push(record);
-        });
-
-        this.rawRecords = records;
+          if (records.length > 0) {
+            this.rawRecords = records;
+            return true;
+          }
+          return false;
+        } catch (e) {
+          console.error('Error parsing GViz response:', e);
+          return false;
+        }
       }
 
-      // CSV Parser
       parseCsvData(csvText) {
-        const lines = csvText.split(/\r?\n/).filter(line => line.trim().length > 0);
-        if (lines.length < 2) return;
+        try {
+          const lines = this.splitCsvIntoRows(csvText);
+          if (lines.length < 2) return false;
 
-        // Simple CSV parse with quote handling
-        const parseLine = (text) => {
-          const result = [];
-          let current = '';
-          let inQuotes = false;
-          for (let i = 0; i < text.length; i++) {
-            const char = text[i];
-            if (char === '"' || char === "'") {
-              inQuotes = !inQuotes;
-            } else if (char === ',' && !inQuotes) {
-              result.push(current.trim());
-              current = '';
-            } else {
-              current += char;
-            }
+          const headers = this.parseCsvRow(lines[0]);
+          this.mapColumns(headers);
+
+          const records = [];
+          for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+            const values = this.parseCsvRow(line);
+            if (values.every(v => !v)) continue;
+            records.push(this.createRecordFromRow(values, i - 1));
           }
-          result.push(current.trim());
-          return result;
-        };
 
-        this.headers = parseLine(lines[0]);
-        this.detectColumnMapping(this.headers);
+          if (records.length > 0) {
+            this.rawRecords = records;
+            return true;
+          }
+          return false;
+        } catch (e) {
+          console.error('Error parsing CSV:', e);
+          return false;
+        }
+      }
 
-        const records = [];
-        for (let i = 1; i < lines.length; i++) {
-          const values = parseLine(lines[i]);
-          if (values.some(v => v.length > 0)) {
-            records.push(this.normalizeRecord(values, i));
+      splitCsvIntoRows(text) {
+        const rows = [];
+        let currentRow = '';
+        let inQuotes = false;
+        for (let i = 0; i < text.length; i++) {
+          const c = text[i];
+          const next = text[i + 1];
+          if (c === '"') {
+            if (inQuotes && next === '"') {
+              currentRow += '"';
+              i++;
+            } else {
+              inQuotes = !inQuotes;
+            }
+          } else if ((c === '\r' || c === '\n') && !inQuotes) {
+            if (c === '\r' && next === '\n') i++;
+            rows.push(currentRow);
+            currentRow = '';
+          } else {
+            currentRow += c;
           }
         }
-        this.rawRecords = records;
+        if (currentRow) rows.push(currentRow);
+        return rows;
       }
 
-      // Intelligent Column Mapping: Accurately maps "His Call Response", "Any Remarks...", "Upload CV" etc.
-      detectColumnMapping(headers) {
-        const findColIdx = (patterns) => {
-          for (const pattern of patterns) {
-            const idx = headers.findIndex(h => pattern.test(h.toLowerCase().trim()));
-            if (idx !== -1) return idx;
+      parseCsvRow(rowText) {
+        const result = [];
+        let currentVal = '';
+        let inQuotes = false;
+        for (let i = 0; i < rowText.length; i++) {
+          const c = rowText[i];
+          const next = rowText[i + 1];
+          if (c === '"') {
+            if (inQuotes && next === '"') {
+              currentVal += '"';
+              i++;
+            } else {
+              inQuotes = !inQuotes;
+            }
+          } else if (c === ',' && !inQuotes) {
+            result.push(currentVal.trim());
+            currentVal = '';
+          } else {
+            currentVal += c;
           }
-          return -1;
-        };
-
-        this.detectedColumns = {
-          studentName: findColIdx([/student.*name/i, /caller/i, /your.*name/i, /student/i, /name.*student/i]),
-          studentClass: findColIdx([/student.*class/i, /your.*class/i, /class/i, /batch/i, /department/i, /branch/i]),
-          contactSerial: findColIdx([/serial/i, /sl/i, /s\.no/i, /contact.*no/i, /call.*no/i, /target.*no/i, /person.*no/i]),
-          contactName: findColIdx([/contact.*name/i, /person.*name/i, /parent.*name/i, /target.*person/i, /name/i]),
-          // Target exact column "His Call Response"
-          status: findColIdx([
-            /his\s*call\s*response/i,
-            /call\s*response/i,
-            /call.*status/i,
-            /response/i,
-            /call.*attended/i,
-            /status/i
-          ]),
-          // Target exact column "Any Remarks about his contact. (is he number wrong, switched off etc)"
-          notAttendedReason: findColIdx([
-            /any\s*remarks\s*about\s*his\s*contact/i,
-            /remarks.*contact/i,
-            /is\s*he\s*number\s*wrong/i,
-            /switched\s*off/i,
-            /remarks/i,
-            /reason/i,
-            /why.*not/i
-          ]),
-          // Target "Upload CV"
-          cvLink: findColIdx([
-            /upload\s*cv/i,
-            /cv/i,
-            /resume/i,
-            /drive.*link/i
-          ]),
-          attendedData: findColIdx([
-            /attended.*data/i,
-            /feedback/i,
-            /notes/i,
-            /details/i,
-            /response.*detail/i,
-            /data/i
-          ]),
-          timestamp: findColIdx([/timestamp/i, /date/i, /time/i]),
-          phone: findColIdx([/phone/i, /mobile/i, /contact.*number/i, /number/i])
-        };
-
-        // Fallbacks if not auto-detected
-        if (this.detectedColumns.studentName === -1 && headers.length > 0) this.detectedColumns.studentName = 1;
-        if (this.detectedColumns.studentClass === -1 && headers.length > 1) this.detectedColumns.studentClass = 2;
+        }
+        result.push(currentVal.trim());
+        return result;
       }
 
-      // Standardize record into a clean, predictable shape
-      normalizeRecord(values, rowNumber) {
-        const getVal = (colIdx, fallback = '') => {
-          if (colIdx !== -1 && colIdx !== null && colIdx < values.length && values[colIdx] !== null && values[colIdx] !== undefined) {
-            return String(values[colIdx]).trim();
+      mapColumns(headers) {
+        this.headers = headers;
+        const lowerHeaders = headers.map(h => (h || '').trim().toLowerCase());
+
+        const findCol = (predicate) => {
+          const idx = lowerHeaders.findIndex(predicate);
+          return idx !== -1 ? idx : null;
+        };
+
+        this.detectedColumns.studentName = findCol(h => 
+          h.includes('student name') || h.includes('caller name') || h.includes('your name') || h === 'name' || h.includes('caller')
+        );
+
+        this.detectedColumns.studentClass = findCol(h => 
+          h.includes('class') || h.includes('batch') || h.includes('department') || h.includes('course') || h.includes('year')
+        );
+
+        this.detectedColumns.contactSerial = findCol(h => 
+          h.includes('serial') || h.includes('s.no') || h.includes('sno') || h.includes('slot') || h.includes('target') || h.includes('person number')
+        );
+
+        this.detectedColumns.contactName = findCol((h, idx) => 
+          (h.includes('person') || h.includes('contact') || h.includes('candidate') || h.includes('whom')) && 
+          idx !== this.detectedColumns.studentName
+        );
+
+        this.detectedColumns.status = findCol(h => 
+          h.includes('his call response') || h.includes('call response') || h.includes('response') || h.includes('status') || h.includes('attended')
+        );
+
+        this.detectedColumns.notAttendedReason = findCol(h => 
+          h.includes('remarks about his contact') || h.includes('is he number wrong') || h.includes('switched off') || h.includes('reason') || h.includes('remarks')
+        );
+
+        this.detectedColumns.cvLink = findCol(h => 
+          h.includes('upload cv') || h.includes('cv') || h.includes('resume') || h.includes('drive')
+        );
+
+        this.detectedColumns.phone = findCol(h => 
+          h.includes('phone') || h.includes('mobile') || h.includes('contact no') || h.includes('number')
+        );
+
+        this.detectedColumns.timestamp = findCol(h => 
+          h.includes('timestamp') || h.includes('time') || h.includes('date')
+        );
+      }
+
+      createRecordFromRow(values, index) {
+        const getVal = (colIndex, fallback = '') => {
+          if (colIndex !== null && colIndex !== undefined && values[colIndex] !== undefined) {
+            return String(values[colIndex]).trim() || fallback;
           }
           return fallback;
         };
 
-        const sName = getVal(this.detectedColumns.studentName, 'Unassigned Student');
-        const sClass = getVal(this.detectedColumns.studentClass, 'General Batch');
-        const cSerial = getVal(this.detectedColumns.contactSerial, String((rowNumber % 7) || 7));
-        const cName = getVal(this.detectedColumns.contactName, `Contact Person #${rowNumber}`);
-        const phone = getVal(this.detectedColumns.phone, '-');
-        const timestamp = getVal(this.detectedColumns.timestamp, 'Recently');
+        const studentName = getVal(this.detectedColumns.studentName) || `Student #${(index % 10) + 1}`;
+        const studentClass = getVal(this.detectedColumns.studentClass) || 'General Batch';
 
-        // Exact reading of "His Call Response"
-        const rawCallResponse = getVal(this.detectedColumns.status, '').trim();
-        const normResponse = rawCallResponse.toLowerCase();
+        let contactSerial = getVal(this.detectedColumns.contactSerial);
+        if (!contactSerial || isNaN(parseInt(contactSerial, 10))) {
+          contactSerial = String((index % 7) + 1);
+        } else {
+          contactSerial = String(parseInt(contactSerial, 10));
+        }
 
-        // Exact reading of "Any Remarks about his contact..."
-        const rawRemarks = getVal(this.detectedColumns.notAttendedReason, '').trim();
+        const contactName = getVal(this.detectedColumns.contactName) || `Contact Person ${contactSerial}`;
+        const phone = getVal(this.detectedColumns.phone) || 'Contact Number N/A';
+        const timestamp = getVal(this.detectedColumns.timestamp) || new Date().toLocaleDateString();
 
-        // Exact reading of "Upload CV"
-        const rawCv = getVal(this.detectedColumns.cvLink, '').trim();
+        // Specific mapping to His Call Response: Call Attended vs Call Not Attended
+        const rawResponse = getVal(this.detectedColumns.status);
+        const lowerResp = rawResponse.toLowerCase();
 
-        // Accurate evaluation: "Call Attended" vs "Call Not Attended"
         let isAttended = false;
-        if (normResponse.includes('not attended') || normResponse.includes('call not attended') || normResponse === 'no' || normResponse === 'unanswered') {
+        if (lowerResp.includes('attended') && !lowerResp.includes('not')) {
+          isAttended = true;
+        } else if (lowerResp.includes('not attended') || lowerResp.includes('not answered')) {
           isAttended = false;
-        } else if (normResponse.includes('call attended') || normResponse.includes('attended') || normResponse === 'yes') {
+        } else if (lowerResp.includes('yes') || lowerResp.includes('connected')) {
           isAttended = true;
         } else {
-          // If response column had reasons directly or is blank
-          if (rawRemarks && rawRemarks.length > 1 && !rawCallResponse.includes('attend')) {
+          const remarksVal = getVal(this.detectedColumns.notAttendedReason);
+          if (remarksVal && remarksVal !== '-' && remarksVal.length > 2) {
             isAttended = false;
-          } else if (normResponse.includes('attend')) {
-            isAttended = true;
           } else {
-            isAttended = false;
+            isAttended = true;
           }
         }
 
-        const reason = !isAttended ? (rawRemarks || rawCallResponse || 'No specific remark recorded') : 'N/A';
+        const status = isAttended ? 'ATTENDED' : 'NOT_ATTENDED';
 
-        // Prepare full sheet column snapshot for attended people
-        const allColumns = [];
-        this.headers.forEach((headerText, colIdx) => {
-          const val = (colIdx < values.length && values[colIdx] !== null && values[colIdx] !== undefined)
-            ? String(values[colIdx]).trim()
-            : '';
-          allColumns.push({
-            header: headerText || `Column ${colIdx + 1}`,
-            value: val || '-'
-          });
-        });
+        // Remarks about his contact
+        const remarks = getVal(this.detectedColumns.notAttendedReason) || (isAttended ? '-' : 'Call Not Answered');
+        const notAttendedReason = isAttended ? '-' : remarks;
+
+        // Upload CV
+        let cvLink = getVal(this.detectedColumns.cvLink);
+        if (!cvLink || !cvLink.startsWith('http')) {
+          const driveCol = values.find(v => typeof v === 'string' && (v.includes('drive.google.com') || v.includes('.pdf')));
+          if (driveCol) cvLink = driveCol;
+        }
+
+        // Attended data preview
+        let attendedData = '-';
+        if (isAttended) {
+          const skipIndices = new Set([
+            this.detectedColumns.studentName,
+            this.detectedColumns.studentClass,
+            this.detectedColumns.contactSerial,
+            this.detectedColumns.contactName,
+            this.detectedColumns.status,
+            this.detectedColumns.phone,
+            this.detectedColumns.timestamp
+          ]);
+          for (let i = 0; i < values.length; i++) {
+            if (!skipIndices.has(i) && values[i] && values[i] !== '-' && !values[i].startsWith('http')) {
+              attendedData = values[i];
+              break;
+            }
+          }
+          if (!attendedData || attendedData === '-') attendedData = 'Call attended - details verified';
+        }
+
+        const allColumns = this.headers.map((hdr, cIdx) => ({
+          header: hdr || `Field ${cIdx + 1}`,
+          value: values[cIdx] || '-'
+        }));
 
         return {
-          id: rowNumber,
-          studentName: sName || 'Unknown Student',
-          studentClass: (sClass || 'General').toUpperCase().trim(),
-          contactSerial: cSerial || '1',
-          contactName: cName,
-          status: isAttended ? 'ATTENDED' : 'NOT_ATTENDED',
-          rawStatus: rawCallResponse || (isAttended ? 'Call Attended' : 'Call Not Attended'),
-          attendedData: isAttended ? (rawCallResponse || 'Call Attended') : 'N/A',
-          notAttendedReason: reason,
-          remarks: rawRemarks || reason,
-          cvLink: rawCv || '',
-          allColumns: allColumns,
-          phone: phone,
-          timestamp: timestamp
+          id: index + 1,
+          studentName,
+          studentClass,
+          contactSerial,
+          contactName,
+          phone,
+          status,
+          rawStatus: rawResponse || (isAttended ? 'Call Attended' : 'Call Not Attended'),
+          attendedData,
+          notAttendedReason,
+          remarks,
+          cvLink: cvLink || '',
+          timestamp,
+          allColumns
         };
       }
 
-      // Comprehensive Simulated Fallback Data (reflecting 7-person college drive model)
-      loadRealisticCampusMockData() {
-        const classes = ['CS-A', 'CS-B', 'ECE-A', 'MECH', 'CIVIL', 'BCA'];
-        const studentNames = [
-          'Arun Kumar', 'Deepa Nair', 'Muhammed Rishal', 'Sneha Varghese', 
-          'Gokul Ramesh', 'Fathima Zahra', 'Kiran Das', 'Anjali Menon', 
-          'Rahul Chandran', 'Nandana S.', 'Vivek Pillai', 'Sujith K.'
-        ];
-        const reasons = [
-          'Switched Off / Mobile Unreachable',
-          'Ringing No Response (3 attempts)',
-          'Busy / Call disconnected',
-          'Wrong Number / Invalid contact',
-          'Requested call back tomorrow',
-          'Call Rejected / Busy Tone'
-        ];
-        const sampleCvs = [
-          'https://drive.google.com/file/d/1sampleDocDriveLink99123/view?usp=sharing',
-          '',
-          'https://drive.google.com/file/d/1anotherResumeDriveLink456/view?usp=sharing',
-          '',
-          'https://drive.google.com/file/d/1cvDriveGoogleStudentFile789/view?usp=sharing'
-        ];
-
+      loadSeedData() {
         this.headers = [
           'Timestamp',
           'Student Name',
           'Student Class',
-          'Contact Serial No',
-          'Contact Person Name',
+          'Serial Number (1 to 7)',
+          'Target Person Name',
           'Contact Phone Number',
           'His Call Response',
+          'Attended Feedback / Academic Interest',
           'Any Remarks about his contact. (is he number wrong, switched off etc)',
-          'Upload CV',
-          'Course Interested',
-          'City / Location'
+          'Upload CV'
+        ];
+        this.mapColumns(this.headers);
+
+        const students = [
+          { name: 'Rahul Sharma', cls: 'B.Tech CSE - Final Year' },
+          { name: 'Ananya Verma', cls: 'B.Tech CSE - Final Year' },
+          { name: 'Karthik Nair', cls: 'B.Tech ECE - 3rd Year' },
+          { name: 'Sneha Patel', cls: 'B.Tech ECE - 3rd Year' },
+          { name: 'Amitabh Das', cls: 'MCA - 2nd Year' },
+          { name: 'Pooja Iyer', cls: 'MCA - 2nd Year' },
+          { name: 'Vikram Singh', cls: 'B.Tech ME - 4th Year' }
         ];
 
-        const mock = [];
+        const reasons = [
+          'Switched Off',
+          'Ringing but not answered',
+          'Wrong Number Provided',
+          'Busy / Call Cut',
+          'Out of Coverage Area',
+          'Requested Callback Later'
+        ];
+
+        const records = [];
         let rowId = 1;
 
-        studentNames.forEach((sName, sIdx) => {
-          const sClass = classes[sIdx % classes.length];
-          const completedCalls = 5 + (sIdx % 3); // 5 to 7 calls completed
-          
-          for (let callNum = 1; callNum <= completedCalls; callNum++) {
-            const isAttended = Math.random() > 0.40; // ~60% attended
-            const callResponseVal = isAttended ? 'Call Attended' : 'Call Not Attended';
-            const remarkVal = isAttended ? '' : reasons[(rowId + callNum) % reasons.length];
-            const cvVal = isAttended ? sampleCvs[(rowId + callNum) % sampleCvs.length] : '';
+        students.forEach((stud, sIdx) => {
+          const count = sIdx === 6 ? 4 : (sIdx === 5 ? 6 : 7);
+          for (let slot = 1; slot <= count; slot++) {
+            const isAttended = (slot + sIdx) % 3 !== 0;
+            const reason = isAttended ? '-' : reasons[(slot + sIdx) % reasons.length];
+            const hasCv = isAttended && (slot % 2 === 1);
+            const cv = hasCv ? `https://drive.google.com/file/d/1CvMockDocument_${rowId}/view?usp=sharing` : '';
 
-            const rowVals = [
-              '2026-11-09 10:15 AM',
-              sName,
-              sClass,
-              String(callNum),
-              `Contact Person ${callNum} of ${sName.split(' ')[0]}`,
-              `+91 9847${Math.floor(100000 + Math.random() * 900000)}`,
-              callResponseVal,
-              remarkVal,
-              cvVal,
-              isAttended ? 'B.Tech Computer Science' : '-',
-              isAttended ? 'Kozhikode' : '-'
+            const values = [
+              `2026-03-${10 + slot} 14:${(slot * 7) % 60}:00`,
+              stud.name,
+              stud.cls,
+              String(slot),
+              `Candidate ${stud.name.split(' ')[0]} #${slot}`,
+              `+91 98765 ${10000 + rowId}`,
+              isAttended ? 'Call Attended' : 'Call Not Attended',
+              isAttended ? `Candidate verified contact details and confirmed interest for drive slot #${slot}` : '-',
+              isAttended ? '-' : reason,
+              cv
             ];
 
-            const allCols = this.headers.map((h, i) => ({ header: h, value: rowVals[i] || '-' }));
-
-            mock.push({
-              id: rowId,
-              studentName: sName,
-              studentClass: sClass,
-              contactSerial: String(callNum),
-              contactName: `Contact Person ${callNum}`,
-              status: isAttended ? 'ATTENDED' : 'NOT_ATTENDED',
-              rawStatus: callResponseVal,
-              attendedData: isAttended ? 'Response submitted successfully' : 'N/A',
-              notAttendedReason: isAttended ? 'N/A' : (remarkVal || 'No response'),
-              remarks: remarkVal || (isAttended ? '' : 'No response'),
-              cvLink: cvVal,
-              allColumns: allCols,
-              phone: rowVals[5],
-              timestamp: '2026-11-09 10:15 AM'
-            });
+            records.push(this.createRecordFromRow(values, rowId - 1));
             rowId++;
           }
         });
 
-        this.rawRecords = mock;
+        this.rawRecords = records;
+        this.populateFilterDropdowns();
+        this.applyFilters();
       }
 
-      // ================= FILTER & DATA AGGREGATION =================
+      // ================= FILTER & CHART ENGINE =================
       populateFilterDropdowns() {
-        // Classes dropdown
-        const classSelect = document.getElementById('classFilter');
-        const currentClass = classSelect.value;
-        const classes = [...new Set(this.rawRecords.map(r => r.studentClass))].sort();
+        const classFilter = document.getElementById('classFilter');
+        const reasonFilter = document.getElementById('reasonFilter');
 
-        classSelect.innerHTML = `<option value="ALL">All Classes (${classes.length})</option>` +
-          classes.map(c => `<option value="${c}">${c}</option>`).join('');
-        if (classes.includes(currentClass)) classSelect.value = currentClass;
+        if (classFilter) {
+          const currentClassVal = classFilter.value;
+          const classes = [...new Set(this.rawRecords.map(r => r.studentClass))].filter(Boolean).sort();
+          classFilter.innerHTML = '<option value="ALL">All Classes</option>' +
+            classes.map(c => `<option value="${c}">${c}</option>`).join('');
+          if (classes.includes(currentClassVal)) {
+            classFilter.value = currentClassVal;
+          }
+        }
 
-        // Reasons dropdown
-        const reasonSelect = document.getElementById('reasonFilter');
-        const currentReason = reasonSelect.value;
-        const reasons = [...new Set(this.rawRecords.filter(r => r.status === 'NOT_ATTENDED').map(r => r.notAttendedReason))].filter(Boolean).sort();
-
-        reasonSelect.innerHTML = `<option value="ALL">All Non-Attended Reasons (${reasons.length})</option>` +
-          reasons.map(r => `<option value="${r}">${r}</option>`).join('');
-        if (reasons.includes(currentReason)) reasonSelect.value = currentReason;
+        if (reasonFilter) {
+          const currentReasonVal = reasonFilter.value;
+          const reasons = [...new Set(this.rawRecords.filter(r => r.status === 'NOT_ATTENDED').map(r => r.notAttendedReason))]
+            .filter(r => r && r !== '-')
+            .sort();
+          reasonFilter.innerHTML = '<option value="ALL">All Non-Attended Reasons</option>' +
+            reasons.map(rn => `<option value="${rn}">${rn}</option>`).join('');
+          if (reasons.includes(currentReasonVal)) {
+            reasonFilter.value = currentReasonVal;
+          }
+        }
       }
 
       onFilterChange() {
@@ -1269,133 +1336,109 @@
       }
 
       clearSearch() {
-        const input = document.getElementById('globalSearchInput');
-        if (input) input.value = '';
+        const searchInput = document.getElementById('globalSearchInput');
+        if (searchInput) searchInput.value = '';
         this.onFilterChange();
       }
 
       resetAllFilters() {
-        const el = (id) => document.getElementById(id);
-        if (el('globalSearchInput')) el('globalSearchInput').value = '';
-        if (el('classFilter')) el('classFilter').value = 'ALL';
-        if (el('statusFilter')) el('statusFilter').value = 'ALL';
-        if (el('reasonFilter')) el('reasonFilter').value = 'ALL';
-        if (el('targetFilter')) el('targetFilter').value = 'ALL';
+        const searchInput = document.getElementById('globalSearchInput');
+        if (searchInput) searchInput.value = '';
+        const classFilter = document.getElementById('classFilter');
+        if (classFilter) classFilter.value = 'ALL';
+        const statusFilter = document.getElementById('statusFilter');
+        if (statusFilter) statusFilter.value = 'ALL';
+        const reasonFilter = document.getElementById('reasonFilter');
+        if (reasonFilter) reasonFilter.value = 'ALL';
+        const targetFilter = document.getElementById('targetFilter');
+        if (targetFilter) targetFilter.value = 'ALL';
         this.onFilterChange();
+        this.showToast('All filters have been reset', 'info');
       }
 
       applyFilters() {
-        const searchInput = document.getElementById('globalSearchInput');
-        const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
-        const classFilter = document.getElementById('classFilter');
-        const selectedClass = classFilter ? classFilter.value : 'ALL';
-        const statusFilter = document.getElementById('statusFilter');
-        const selectedStatus = statusFilter ? statusFilter.value : 'ALL';
-        const reasonFilter = document.getElementById('reasonFilter');
-        const selectedReason = reasonFilter ? reasonFilter.value : 'ALL';
-        const targetFilter = document.getElementById('targetFilter');
-        const selectedTarget = targetFilter ? targetFilter.value : 'ALL';
+        const searchTerm = (document.getElementById('globalSearchInput')?.value || '').toLowerCase().trim();
+        const classVal = document.getElementById('classFilter')?.value || 'ALL';
+        const statusVal = document.getElementById('statusFilter')?.value || 'ALL';
+        const reasonVal = document.getElementById('reasonFilter')?.value || 'ALL';
+        const targetVal = document.getElementById('targetFilter')?.value || 'ALL';
 
-        // Show/hide clear search button safely
         const clearBtn = document.getElementById('clearSearchBtn');
-        if (clearBtn) clearBtn.classList.toggle('hidden', query.length === 0);
+        if (clearBtn) {
+          if (searchTerm) clearBtn.classList.remove('hidden');
+          else clearBtn.classList.add('hidden');
+        }
 
-        // Precompute student call totals for target filter
-        const studentCounts = {};
+        const studentTotalCounts = {};
         this.rawRecords.forEach(r => {
-          studentCounts[r.studentName] = (studentCounts[r.studentName] || 0) + 1;
+          studentTotalCounts[r.studentName] = (studentTotalCounts[r.studentName] || 0) + 1;
         });
 
-        // Filter records
-        this.filteredRecords = this.rawRecords.filter(item => {
-          // Search query check
-          if (query) {
+        this.filteredRecords = this.rawRecords.filter(r => {
+          if (searchTerm) {
             const matchSearch = 
-              item.studentName.toLowerCase().includes(query) ||
-              item.studentClass.toLowerCase().includes(query) ||
-              item.contactName.toLowerCase().includes(query) ||
-              item.attendedData.toLowerCase().includes(query) ||
-              item.notAttendedReason.toLowerCase().includes(query) ||
-              item.phone.toLowerCase().includes(query);
+              r.studentName.toLowerCase().includes(searchTerm) ||
+              r.studentClass.toLowerCase().includes(searchTerm) ||
+              r.contactName.toLowerCase().includes(searchTerm) ||
+              r.phone.toLowerCase().includes(searchTerm) ||
+              r.attendedData.toLowerCase().includes(searchTerm) ||
+              r.notAttendedReason.toLowerCase().includes(searchTerm) ||
+              r.remarks.toLowerCase().includes(searchTerm);
             if (!matchSearch) return false;
           }
 
-          // Class filter
-          if (selectedClass !== 'ALL' && item.studentClass !== selectedClass) {
-            return false;
-          }
+          if (classVal !== 'ALL' && r.studentClass !== classVal) return false;
+          if (statusVal !== 'ALL' && r.status !== statusVal) return false;
+          if (reasonVal !== 'ALL' && r.notAttendedReason !== reasonVal) return false;
 
-          // Status filter
-          if (selectedStatus !== 'ALL' && item.status !== selectedStatus) {
-            return false;
-          }
-
-          // Reason filter
-          if (selectedReason !== 'ALL' && item.notAttendedReason !== selectedReason) {
-            return false;
-          }
-
-          // Target status filter (based on 7 person requirement)
-          if (selectedTarget !== 'ALL') {
-            const count = studentCounts[item.studentName] || 0;
-            if (selectedTarget === 'COMPLETE' && count < 7) return false;
-            if (selectedTarget === 'IN_PROGRESS' && (count < 1 || count >= 7)) return false;
-            if (selectedTarget === 'PENDING' && count > 2) return false;
+          if (targetVal !== 'ALL') {
+            const count = studentTotalCounts[r.studentName] || 0;
+            if (targetVal === 'COMPLETE' && count < 7) return false;
+            if (targetVal === 'IN_PROGRESS' && (count === 0 || count >= 7)) return false;
+            if (targetVal === 'PENDING' && count > 2) return false;
           }
 
           return true;
         });
 
-        // Render active filter badges
-        this.renderActiveFilterTags(query, selectedClass, selectedStatus, selectedReason, selectedTarget);
+        this.renderActiveFilterTags(searchTerm, classVal, statusVal, reasonVal, targetVal);
 
-        // Update KPIs
-        this.calculateAndRenderKPIs();
-
-        // Update active view
-        this.renderCurrentView();
-
-        // Update badge counts safely
         const tabCount = document.getElementById('tabCount');
         if (tabCount) tabCount.textContent = this.filteredRecords.length;
+
         const tableRecordCount = document.getElementById('tableRecordCount');
-        if (tableRecordCount) tableRecordCount.textContent = `${this.filteredRecords.length} records`;
+        if (tableRecordCount) tableRecordCount.textContent = `${this.filteredRecords.length} rows`;
+
+        this.calculateAndRenderKPIs();
+        this.renderCharts();
+        this.renderCurrentView();
       }
 
-      renderActiveFilterTags(query, cls, status, reason, target) {
+      renderActiveFilterTags(search, cls, status, reason, target) {
         const container = document.getElementById('activeFilterTags');
         const list = document.getElementById('filterTagsList');
-        const tags = [];
+        if (!container || !list) return;
 
-        if (query) tags.push({ label: `Search: "${query}"`, clear: () => this.clearSearch() });
-        if (cls !== 'ALL') tags.push({ label: `Class: ${cls}`, clear: () => { document.getElementById('classFilter').value = 'ALL'; this.onFilterChange(); } });
-        if (status !== 'ALL') tags.push({ label: `Status: ${status === 'ATTENDED' ? 'Attended' : 'Not Attended'}`, clear: () => { document.getElementById('statusFilter').value = 'ALL'; this.onFilterChange(); } });
-        if (reason !== 'ALL') tags.push({ label: `Reason: ${reason}`, clear: () => { document.getElementById('reasonFilter').value = 'ALL'; this.onFilterChange(); } });
-        if (target !== 'ALL') tags.push({ label: `Target: ${target}`, clear: () => { document.getElementById('targetFilter').value = 'ALL'; this.onFilterChange(); } });
+        const tags = [];
+        if (search) tags.push(`Search: "${search}"`);
+        if (cls !== 'ALL') tags.push(`Class: ${cls}`);
+        if (status !== 'ALL') tags.push(`Status: ${status === 'ATTENDED' ? 'Attended' : 'Not Attended'}`);
+        if (reason !== 'ALL') tags.push(`Reason: ${reason}`);
+        if (target !== 'ALL') tags.push(`Target: ${target}`);
 
         if (tags.length === 0) {
           container.classList.add('hidden');
-          return;
-        }
-
-        container.classList.remove('hidden');
-        list.innerHTML = tags.map((t, idx) => `
-          <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-medium">
-            ${t.label}
-            <button onclick="app.removeFilterTag(${idx})" class="hover:text-indigo-950 font-bold ml-1">&times;</button>
-          </span>
-        `).join('');
-
-        this._activeTagCallbacks = tags.map(t => t.clear);
-      }
-
-      removeFilterTag(index) {
-        if (this._activeTagCallbacks && this._activeTagCallbacks[index]) {
-          this._activeTagCallbacks[index]();
+          list.innerHTML = '';
+        } else {
+          container.classList.remove('hidden');
+          list.innerHTML = tags.map(t => `
+            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
+              ${t}
+            </span>
+          `).join('');
         }
       }
 
-      // ================= KPI CALCULATIONS =================
       calculateAndRenderKPIs() {
         const total = this.filteredRecords.length;
         const attended = this.filteredRecords.filter(r => r.status === 'ATTENDED').length;
@@ -1404,104 +1447,72 @@
         const attendedPct = total > 0 ? Math.round((attended / total) * 100) : 0;
         const notAttendedPct = total > 0 ? Math.round((notAttended / total) * 100) : 0;
 
-        // Distinct students
-        const studentsMap = {};
+        const studentSet = new Set(this.filteredRecords.map(r => r.studentName));
+        const totalStudents = studentSet.size;
+
+        const studentCounts = {};
         this.filteredRecords.forEach(r => {
-          studentsMap[r.studentName] = (studentsMap[r.studentName] || 0) + 1;
+          studentCounts[r.studentName] = (studentCounts[r.studentName] || 0) + 1;
         });
-        const totalUniqueStudents = Object.keys(studentsMap).length;
+        const completedStudents = Object.values(studentCounts).filter(c => c >= 7).length;
+        const targetRate = totalStudents > 0 ? Math.round((completedStudents / totalStudents) * 100) : 0;
 
-        // Target: 7 calls per student
-        const studentsCompleted7 = Object.values(studentsMap).filter(count => count >= 7).length;
-        const targetRate = totalUniqueStudents > 0 ? Math.round((studentsCompleted7 / totalUniqueStudents) * 100) : 0;
-
-        // Top Class analysis
-        const classStats = {};
+        const classRates = {};
         this.filteredRecords.forEach(r => {
-          if (!classStats[r.studentClass]) {
-            classStats[r.studentClass] = { total: 0, attended: 0 };
+          if (!classRates[r.studentClass]) {
+            classRates[r.studentClass] = { total: 0, attended: 0 };
           }
-          classStats[r.studentClass].total++;
-          if (r.status === 'ATTENDED') classStats[r.studentClass].attended++;
+          classRates[r.studentClass].total++;
+          if (r.status === 'ATTENDED') classRates[r.studentClass].attended++;
         });
 
-        let topClassName = 'N/A';
-        let topClassPct = 0;
-        Object.keys(classStats).forEach(c => {
-          const pct = Math.round((classStats[c].attended / classStats[c].total) * 100);
-          if (pct >= topClassPct && classStats[c].total >= 3) {
-            topClassPct = pct;
-            topClassName = c;
+        let topClass = '-';
+        let topClassRate = 0;
+        Object.keys(classRates).forEach(cls => {
+          const data = classRates[cls];
+          if (data.total >= 3) {
+            const rate = Math.round((data.attended / data.total) * 100);
+            if (rate > topClassRate) {
+              topClassRate = rate;
+              topClass = cls;
+            }
           }
         });
 
-        // Safe DOM updates
-        const setEl = (id, val) => {
+        const setSafe = (id, val) => {
           const el = document.getElementById(id);
           if (el) el.textContent = val;
         };
 
-        setEl('kpiTotalCalls', total.toLocaleString());
-        setEl('kpiTotalStudents', totalUniqueStudents);
-        setEl('kpiAttended', attended.toLocaleString());
-        setEl('kpiAttendedPct', `${attendedPct}%`);
-        setEl('kpiNotAttended', notAttended.toLocaleString());
-        setEl('kpiNotAttendedPct', `${notAttendedPct}%`);
-        setEl('kpiTargetRate', `${targetRate}%`);
-        setEl('kpiCompletedStudents', `${studentsCompleted7} / ${totalUniqueStudents} Done`);
-        setEl('kpiTopClass', topClassName);
-        setEl('kpiTopClassRate', `${topClassPct}% response rate`);
-        setEl('donutCenterPct', `${attendedPct}%`);
-        setEl('legendAttendedCount', attended);
-        setEl('legendNotAttendedCount', notAttended);
+        setSafe('kpiTotalCalls', total);
+        setSafe('kpiTotalStudents', totalStudents);
+        setSafe('kpiAttended', attended);
+        setSafe('kpiAttendedPct', `${attendedPct}%`);
+        setSafe('kpiNotAttended', notAttended);
+        setSafe('kpiNotAttendedPct', `${notAttendedPct}%`);
+        setSafe('kpiTargetRate', `${targetRate}%`);
+        setSafe('kpiCompletedStudents', `${completedStudents} / ${totalStudents} Done`);
+        setSafe('kpiTopClass', topClass);
+        setSafe('kpiTopClassRate', topClass !== '-' ? `${topClassRate}% response rate` : 'Pending calls');
+
+        setSafe('donutCenterPct', `${attendedPct}%`);
+        setSafe('legendAttendedCount', attended);
+        setSafe('legendNotAttendedCount', notAttended);
       }
 
-      // ================= VIEW RENDERING & TABS =================
-      switchTab(tabName) {
-        this.currentTab = tabName;
-        const tabs = ['dashboard', 'classes', 'students', 'records'];
-
-        tabs.forEach(tab => {
-          const btn = document.getElementById(`tab-btn-${tab}`);
-          const view = document.getElementById(`view-${tab}`);
-
-          if (tab === tabName) {
-            btn.className = 'nav-tab px-3 py-1.5 rounded-lg text-white bg-indigo-600 flex items-center gap-1.5 transition';
-            view.classList.remove('hidden');
-          } else {
-            btn.className = 'nav-tab px-3 py-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 flex items-center gap-1.5 transition';
-            view.classList.add('hidden');
-          }
-        });
-
-        this.renderCurrentView();
-      }
-
-      renderCurrentView() {
-        if (this.currentTab === 'dashboard') {
-          this.renderCharts();
-        } else if (this.currentTab === 'classes') {
-          this.renderClassAnalytics();
-        } else if (this.currentTab === 'students') {
-          this.renderStudentTracker();
-        } else if (this.currentTab === 'records') {
-          this.renderRecordsTable();
-        }
-      }
-
-      // ================= CHART.JS VISUALIZATIONS =================
       renderCharts() {
-        // Destroy old charts to prevent canvas re-use errors
-        if (this.statusChart) this.statusChart.destroy();
-        if (this.reasonsChart) this.reasonsChart.destroy();
-        if (this.classesChart) this.classesChart.destroy();
+        const statusCanvas = document.getElementById('statusChart');
+        const reasonsCanvas = document.getElementById('reasonsChart');
+        const classesCanvas = document.getElementById('classesChart');
+
+        if (!statusCanvas || !reasonsCanvas || !classesCanvas) return;
 
         const attended = this.filteredRecords.filter(r => r.status === 'ATTENDED').length;
-        const notAttended = this.filteredRecords.length - attended;
+        const notAttended = this.filteredRecords.filter(r => r.status === 'NOT_ATTENDED').length;
 
-        // 1. Status Donut Chart
-        const statusCtx = document.getElementById('statusChart').getContext('2d');
-        this.statusChart = new Chart(statusCtx, {
+        // 1. Status Donut
+        if (this.statusChart) this.statusChart.destroy();
+        this.statusChart = new Chart(statusCanvas.getContext('2d'), {
           type: 'doughnut',
           data: {
             labels: ['Attended', 'Not Attended'],
@@ -1509,8 +1520,7 @@
               data: [attended, notAttended],
               backgroundColor: ['#10b981', '#f43f5e'],
               borderWidth: 2,
-              borderColor: '#ffffff',
-              hoverOffset: 4
+              borderColor: '#ffffff'
             }]
           },
           options: {
@@ -1521,19 +1531,14 @@
               legend: { display: false },
               tooltip: {
                 callbacks: {
-                  label: function(context) {
-                    const val = context.raw;
-                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                    const pct = total > 0 ? Math.round((val / total) * 100) : 0;
-                    return ` ${context.label}: ${val} calls (${pct}%)`;
-                  }
+                  label: (ctx) => ` ${ctx.label}: ${ctx.raw} calls`
                 }
               }
             }
           }
         });
 
-        // 2. Reasons Breakdown Horizontal Bar Chart
+        // 2. Reasons Bar
         const reasonCounts = {};
         this.filteredRecords.filter(r => r.status === 'NOT_ATTENDED').forEach(r => {
           const reason = r.notAttendedReason || 'Unspecified';
@@ -1544,70 +1549,64 @@
           .sort((a, b) => b[1] - a[1])
           .slice(0, 6);
 
-        const reasonsCtx = document.getElementById('reasonsChart').getContext('2d');
-        this.reasonsChart = new Chart(reasonsCtx, {
+        const reasonLabels = sortedReasons.map(e => e[0]);
+        const reasonData = sortedReasons.map(e => e[1]);
+
+        if (this.reasonsChart) this.reasonsChart.destroy();
+        this.reasonsChart = new Chart(reasonsCanvas.getContext('2d'), {
           type: 'bar',
           data: {
-            labels: sortedReasons.map(r => r[0].length > 25 ? r[0].slice(0, 25) + '...' : r[0]),
+            labels: reasonLabels.length > 0 ? reasonLabels : ['No non-attended calls'],
             datasets: [{
-              label: 'Occurrences',
-              data: sortedReasons.map(r => r[1]),
-              backgroundColor: '#f87171',
-              borderRadius: 6,
-              barThickness: 18
+              label: 'Calls',
+              data: reasonData.length > 0 ? reasonData : [0],
+              backgroundColor: '#fb7185',
+              borderRadius: 8
             }]
           },
           options: {
             indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-              legend: { display: false }
-            },
+            plugins: { legend: { display: false } },
             scales: {
-              x: {
-                grid: { color: '#f1f5f9' },
-                ticks: { stepSize: 1, color: '#64748b', font: { size: 10 } }
-              },
-              y: {
-                grid: { display: false },
-                ticks: { color: '#334155', font: { size: 11, weight: 600 } }
-              }
+              x: { beginAtZero: true, ticks: { stepSize: 1 } },
+              y: { ticks: { font: { size: 11 } } }
             }
           }
         });
 
-        // 3. Class Performance Stacked Bar Chart
-        const classMap = {};
+        // 3. Class-wise stacked bar
+        const classData = {};
         this.filteredRecords.forEach(r => {
-          if (!classMap[r.studentClass]) {
-            classMap[r.studentClass] = { attended: 0, notAttended: 0 };
+          if (!classData[r.studentClass]) {
+            classData[r.studentClass] = { attended: 0, notAttended: 0 };
           }
-          if (r.status === 'ATTENDED') classMap[r.studentClass].attended++;
-          else classMap[r.studentClass].notAttended++;
+          if (r.status === 'ATTENDED') classData[r.studentClass].attended++;
+          else classData[r.studentClass].notAttended++;
         });
 
-        const classLabels = Object.keys(classMap).sort();
-        const attendedByClass = classLabels.map(c => classMap[c].attended);
-        const notAttendedByClass = classLabels.map(c => classMap[c].notAttended);
+        const classNames = Object.keys(classData).slice(0, 8);
+        const classAttended = classNames.map(c => classData[c].attended);
+        const classNotAttended = classNames.map(c => classData[c].notAttended);
 
-        const classesCtx = document.getElementById('classesChart').getContext('2d');
-        this.classesChart = new Chart(classesCtx, {
+        if (this.classesChart) this.classesChart.destroy();
+        this.classesChart = new Chart(classesCanvas.getContext('2d'), {
           type: 'bar',
           data: {
-            labels: classLabels,
+            labels: classNames.length > 0 ? classNames : ['No data'],
             datasets: [
               {
                 label: 'Attended',
-                data: attendedByClass,
+                data: classAttended.length > 0 ? classAttended : [0],
                 backgroundColor: '#10b981',
-                borderRadius: 4
+                borderRadius: 6
               },
               {
                 label: 'Not Attended',
-                data: notAttendedByClass,
+                data: classNotAttended.length > 0 ? classNotAttended : [0],
                 backgroundColor: '#fb7185',
-                borderRadius: 4
+                borderRadius: 6
               }
             ]
           },
@@ -1615,22 +1614,72 @@
             responsive: true,
             maintainAspectRatio: false,
             scales: {
-              x: {
-                stacked: true,
-                grid: { display: false },
-                ticks: { color: '#334155', font: { weight: 600 } }
-              },
-              y: {
-                stacked: true,
-                grid: { color: '#f1f5f9' },
-                ticks: { color: '#64748b' }
-              }
+              x: { stacked: true, ticks: { font: { size: 11 } } },
+              y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1 } }
             },
-            plugins: {
-              legend: { display: false }
-            }
+            plugins: { legend: { display: false } }
           }
         });
+      }
+
+      switchTab(tabId) {
+        this.currentTab = tabId;
+
+        const tabButtons = ['dashboard', 'classes', 'students', 'records'];
+        tabButtons.forEach(id => {
+          const btn = document.getElementById(`tab-btn-${id}`);
+          const view = document.getElementById(`view-${id}`);
+          if (btn) {
+            if (id === tabId) {
+              btn.className = 'nav-tab px-3 py-1.5 rounded-lg text-white bg-indigo-600 flex items-center gap-1.5 transition whitespace-nowrap';
+            } else {
+              btn.className = 'nav-tab px-3 py-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 flex items-center gap-1.5 transition whitespace-nowrap';
+            }
+          }
+          if (view) {
+            if (id === tabId) view.classList.remove('hidden');
+            else view.classList.add('hidden');
+          }
+        });
+
+        this.renderCurrentView();
+      }
+
+      renderCurrentView() {
+        if (this.currentTab === 'classes') {
+          this.renderClassAnalytics();
+        } else if (this.currentTab === 'students') {
+          this.renderStudentTracker();
+        } else if (this.currentTab === 'records') {
+          this.renderRecordsTable();
+        }
+      }
+
+      showToast(msg, type = 'info') {
+        const toast = document.getElementById('toastNotification');
+        const icon = document.getElementById('toastIcon');
+        const msgEl = document.getElementById('toastMsg');
+        if (!toast || !icon || !msgEl) return;
+
+        msgEl.textContent = msg;
+
+        if (type === 'success') {
+          icon.className = 'fa-solid fa-circle-check text-emerald-400';
+        } else if (type === 'error') {
+          icon.className = 'fa-solid fa-circle-xmark text-rose-400';
+        } else if (type === 'warning') {
+          icon.className = 'fa-solid fa-triangle-exclamation text-amber-400';
+        } else {
+          icon.className = 'fa-solid fa-circle-info text-indigo-400';
+        }
+
+        toast.classList.remove('translate-y-20', 'opacity-0');
+        toast.classList.add('translate-y-0', 'opacity-100');
+
+        setTimeout(() => {
+          toast.classList.remove('translate-y-0', 'opacity-100');
+          toast.classList.add('translate-y-20', 'opacity-0');
+        }, 3500);
       }
 
       // ================= CLASS ANALYTICS VIEW =================
@@ -2010,11 +2059,11 @@
         const subtitle = document.getElementById('modalSubtitle');
         const body = document.getElementById('modalBody');
 
-        icon.className = `w-9 h-9 rounded-xl flex items-center justify-center text-white ${isAttended ? 'bg-emerald-600' : 'bg-rose-600'}`;
+        icon.className = `w-10 h-10 rounded-xl flex items-center justify-center text-white flex-shrink-0 shadow-sm ${isAttended ? 'bg-emerald-600' : 'bg-rose-600'}`;
         icon.innerHTML = `<i class="fa-solid ${isAttended ? 'fa-phone-flip' : 'fa-phone-slash'}"></i>`;
 
         title.textContent = `${record.contactName}`;
-        subtitle.textContent = `Call Slot #${record.contactSerial} • ${record.studentName} [${record.studentClass}]`;
+        subtitle.textContent = `Call Slot #${record.contactSerial} • Recorded by ${record.studentName} [${record.studentClass}]`;
 
         // Check CV link presence
         const hasCv = record.cvLink && record.cvLink.trim().length > 3 && record.cvLink.toLowerCase() !== 'n/a' && record.cvLink.toLowerCase() !== '-';
@@ -2022,137 +2071,146 @@
         let contentHtml = '';
 
         if (isAttended) {
-          // ================= ATTENDED: SHOW CV + ALL COLUMNS DATA =================
+          // ================= ATTENDED: SHOW CV + ALL COLUMNS DATA IN FULL (NO TRUNCATION) =================
           const cvBadge = hasCv
             ? `
-              <div class="p-3.5 bg-indigo-50 border border-indigo-200 rounded-xl flex items-center justify-between gap-3">
-                <div class="flex items-center gap-2.5">
-                  <div class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-xs">
+              <div class="p-4 bg-indigo-50 border border-indigo-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-sm flex-shrink-0 shadow-sm">
                     <i class="fa-solid fa-file-pdf"></i>
                   </div>
                   <div>
-                    <div class="font-bold text-slate-900 text-xs">Curriculum Vitae (CV / Resume)</div>
-                    <div class="text-[11px] text-indigo-700">Google Drive Document Attached</div>
+                    <div class="font-extrabold text-slate-900 text-xs sm:text-sm">Curriculum Vitae (CV / Resume Attached)</div>
+                    <div class="text-[11px] text-indigo-700 font-medium">Google Drive Document is available for review</div>
                   </div>
                 </div>
-                <a href="${record.cvLink}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs flex items-center gap-1.5 transition active:scale-95 shadow-sm">
-                  <span>Open CV</span>
-                  <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                <a href="${record.cvLink}" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center justify-center gap-2 transition active:scale-95 shadow-sm whitespace-nowrap">
+                  <span>Open PDF in Drive</span>
+                  <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
                 </a>
               </div>
             `
             : `
-              <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-center gap-2.5 text-xs text-slate-500">
-                <i class="fa-regular fa-file-circle-xmark text-slate-400 text-sm"></i>
+              <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl flex items-center gap-2.5 text-xs text-slate-500 font-medium">
+                <i class="fa-regular fa-file-circle-xmark text-slate-400 text-base"></i>
                 <span>There is no CV attached for this person.</span>
               </div>
             `;
 
-          // Generate all columns list
+          // Generate full question & answer cards for every column in the sheet
           const columnsListHtml = (record.allColumns && record.allColumns.length > 0)
             ? record.allColumns.map(col => {
                 const isDriveLink = col.value && (col.value.startsWith('http://') || col.value.startsWith('https://'));
                 return `
-                  <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-200/80 flex flex-col justify-between">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate mb-1" title="${col.header}">
+                  <div class="qa-card">
+                    <div class="qa-question">
                       ${col.header}
-                    </span>
+                    </div>
                     ${isDriveLink ? `
-                      <a href="${col.value}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-800 font-mono text-xs underline truncate flex items-center gap-1">
-                        <span>${col.value}</span>
-                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                      <a href="${col.value}" target="_blank" rel="noopener noreferrer" class="qa-answer text-indigo-600 hover:text-indigo-800 flex items-center justify-between gap-2 underline">
+                        <span class="break-all">${col.value}</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square flex-shrink-0"></i>
                       </a>
                     ` : `
-                      <span class="text-xs font-semibold text-slate-800 break-words">${col.value}</span>
+                      <div class="qa-answer">
+                        ${col.value && col.value !== '-' ? col.value : '<span class="text-slate-400 italic">No entry provided</span>'}
+                      </div>
                     `}
                   </div>
                 `;
               }).join('')
             : `
-              <div class="p-3 bg-slate-50 text-slate-400 text-xs rounded-xl">
-                Standard columns: Status: ${record.rawStatus}, Phone: ${record.phone}
+              <div class="p-4 bg-slate-50 text-slate-500 text-xs rounded-xl text-center">
+                No column data recorded for this entry.
               </div>
             `;
 
           contentHtml = `
             <!-- Attended Status Pill -->
-            <div class="flex items-center justify-between pb-1">
-              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                <i class="fa-solid fa-circle-check text-emerald-500"></i> His Call Response: Call Attended
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-1">
+              <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                <i class="fa-solid fa-circle-check text-emerald-600"></i> His Call Response: Call Attended
               </span>
-              <span class="text-[11px] text-slate-400 font-mono">Row #${record.id}</span>
+              <span class="text-xs text-slate-400 font-mono font-medium">Sheet Row #${record.id}</span>
             </div>
 
             <!-- CV Document Section -->
             ${cvBadge}
 
-            <!-- All Sheet Columns View -->
-            <div class="space-y-1.5 pt-1">
-              <div class="text-xs font-bold text-slate-800 flex items-center justify-between">
-                <span>All Sheet Details Recorded</span>
-                <span class="text-[11px] font-normal text-slate-400">Total ${record.allColumns ? record.allColumns.length : 0} Columns</span>
+            <!-- All Sheet Columns View (Grid with no clipping) -->
+            <div class="space-y-2 pt-1">
+              <div class="flex items-center justify-between">
+                <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wide">
+                  Complete Response Details (${record.allColumns ? record.allColumns.length : 0} Columns)
+                </h4>
+                <span class="text-[11px] text-slate-400">All questions & full answers</span>
               </div>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[300px] overflow-y-auto pr-1">
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                 ${columnsListHtml}
               </div>
             </div>
           `;
         } else {
-          // ================= NOT ATTENDED: SHOW ONLY REMARKS COLUMN =================
+          // ================= NOT ATTENDED: SHOW ONLY REMARKS COLUMN & IDENTITY (FULL DATA, NO TRUNCATION) =================
           const remarksDisplay = record.remarks || record.notAttendedReason || 'No remark entered';
 
           contentHtml = `
             <!-- Not Attended Status Pill -->
-            <div class="flex items-center justify-between pb-1">
-              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200">
-                <i class="fa-solid fa-circle-xmark text-rose-500"></i> His Call Response: Call Not Attended
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-1">
+              <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-300">
+                <i class="fa-solid fa-circle-xmark text-rose-600"></i> His Call Response: Call Not Attended
               </span>
-              <span class="text-[11px] text-slate-400 font-mono">Row #${record.id}</span>
+              <span class="text-xs text-slate-400 font-mono font-medium">Sheet Row #${record.id}</span>
             </div>
 
-            <!-- Student & Caller Identifiers -->
-            <div class="grid grid-cols-2 gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs">
+            <!-- Student & Caller Identifiers (Clean and well spaced) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs">
               <div>
-                <span class="text-[10px] text-slate-400 uppercase font-semibold">Caller / Student</span>
-                <p class="font-bold text-slate-800">${record.studentName}</p>
+                <span class="text-[11px] text-slate-400 font-bold uppercase tracking-wider block mb-0.5">Caller / Student</span>
+                <p class="font-extrabold text-slate-900 text-sm">${record.studentName}</p>
               </div>
               <div>
-                <span class="text-[10px] text-slate-400 uppercase font-semibold">Class</span>
-                <p class="font-bold text-indigo-700">${record.studentClass}</p>
+                <span class="text-[11px] text-slate-400 font-bold uppercase tracking-wider block mb-0.5">Class</span>
+                <p class="font-extrabold text-indigo-700 text-sm">${record.studentClass}</p>
               </div>
               <div>
-                <span class="text-[10px] text-slate-400 uppercase font-semibold">Target Person</span>
+                <span class="text-[11px] text-slate-400 font-bold uppercase tracking-wider block mb-0.5">Target Person</span>
                 <p class="font-bold text-slate-800">${record.contactName}</p>
               </div>
               <div>
-                <span class="text-[10px] text-slate-400 uppercase font-semibold">Contact Slot</span>
-                <p class="font-mono text-slate-700">Slot #${record.contactSerial}</p>
+                <span class="text-[11px] text-slate-400 font-bold uppercase tracking-wider block mb-0.5">Contact Target Slot</span>
+                <p class="font-mono text-slate-700 font-semibold">Slot #${record.contactSerial} • ${record.phone || 'No phone'}</p>
               </div>
             </div>
 
-            <!-- Exclusively Remarks Column -->
-            <div class="p-4 bg-rose-50 rounded-xl border border-rose-200 space-y-2">
-              <div class="text-[11px] font-bold text-rose-800 uppercase tracking-wider flex items-center gap-1.5">
-                <i class="fa-solid fa-triangle-exclamation text-rose-600"></i>
-                <span>Any Remarks about his contact (is he number wrong, switched off etc):</span>
+            <!-- Exclusively Remarks Column Displayed in Full -->
+            <div class="qa-card bg-rose-50/60 border-rose-200">
+              <div class="qa-question text-rose-800 flex items-center gap-2">
+                <i class="fa-solid fa-triangle-exclamation text-rose-600 text-sm"></i>
+                <span>Any Remarks about his contact (is he number wrong, switched off etc)</span>
               </div>
-              <div class="p-3 bg-white rounded-lg border border-rose-100 text-rose-950 font-bold text-xs leading-relaxed">
+              <div class="qa-answer text-rose-950 font-bold bg-white border-rose-200 p-3.5 text-xs sm:text-sm">
                 ${remarksDisplay}
               </div>
             </div>
 
-            <div class="text-[11px] text-slate-400 italic text-center pt-1">
-              Non-attended entry: Details restricted to contact remarks only.
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-500 text-center">
+              <i class="fa-solid fa-circle-info mr-1 text-slate-400"></i>
+              Because this call was not attended, only the contact remarks and identification are recorded.
             </div>
           `;
         }
 
         body.innerHTML = contentHtml;
         modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden'; // prevent background page scrolling
       }
 
       closeDetailModal() {
-        document.getElementById('detailModal').classList.add('hidden');
+        const modal = document.getElementById('detailModal');
+        if (modal) modal.classList.add('hidden');
+        document.body.style.overflow = '';
       }
 
       openStudentModal(studentName) {
@@ -2174,22 +2232,22 @@
         content.innerHTML = studentCalls.map((call, idx) => {
           const isAttended = call.status === 'ATTENDED';
           return `
-            <div class="p-3 rounded-xl border ${isAttended ? 'border-emerald-200 bg-emerald-50/40' : 'border-rose-200 bg-rose-50/40'} flex items-start justify-between gap-3 text-xs">
-              <div class="space-y-1">
+            <div class="p-3.5 rounded-xl border ${isAttended ? 'border-emerald-200 bg-emerald-50/40' : 'border-rose-200 bg-rose-50/40'} flex items-start justify-between gap-3 text-xs">
+              <div class="space-y-1.5 flex-grow">
                 <div class="flex items-center gap-2">
-                  <span class="w-5 h-5 rounded-md flex items-center justify-center font-bold text-[10px] ${isAttended ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'}">
+                  <span class="w-6 h-6 rounded-md flex items-center justify-center font-bold text-xs ${isAttended ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'}">
                     #${call.contactSerial}
                   </span>
-                  <span class="font-bold text-slate-900">${call.contactName}</span>
-                  <span class="text-slate-400 font-mono text-[11px]">${call.phone}</span>
+                  <span class="font-bold text-slate-900 text-sm">${call.contactName}</span>
+                  <span class="text-slate-500 font-mono text-[11px]">${call.phone}</span>
                 </div>
                 ${isAttended ? `
-                  <p class="text-emerald-900 text-xs pl-7"><span class="font-semibold">Response:</span> ${call.attendedData}</p>
+                  <div class="text-emerald-950 text-xs pl-8 break-words"><span class="font-bold">Response:</span> ${call.attendedData}</div>
                 ` : `
-                  <p class="text-rose-900 text-xs pl-7"><span class="font-semibold">Reason:</span> ${call.notAttendedReason}</p>
+                  <div class="text-rose-950 text-xs pl-8 break-words"><span class="font-bold">Reason:</span> ${call.notAttendedReason}</div>
                 `}
               </div>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${isAttended ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'} whitespace-nowrap">
+              <span class="text-[10px] font-bold px-2.5 py-1 rounded-full ${isAttended ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'} whitespace-nowrap flex-shrink-0">
                 ${isAttended ? 'Attended' : 'Not Attended'}
               </span>
             </div>
@@ -2197,10 +2255,13 @@
         }).join('');
 
         modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
       }
 
       closeStudentModal() {
-        document.getElementById('studentModal').classList.add('hidden');
+        const modal = document.getElementById('studentModal');
+        if (modal) modal.classList.add('hidden');
+        document.body.style.overflow = '';
       }
 
       // ================= SETTINGS & AUTO-SYNC =================
@@ -2211,8 +2272,10 @@
           document.getElementById('cfgSheetGid').value = this.sheetGid;
           document.getElementById('cfgAutoSyncInterval').value = String(this.autoSyncInterval);
           modal.classList.remove('hidden');
+          document.body.style.overflow = 'hidden';
         } else {
           modal.classList.add('hidden');
+          document.body.style.overflow = '';
         }
       }
 
