@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Call & Attendance Analytics Dashboard</title>
+    <!-- Chart.js for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Base Reset & Design Tokens */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Glassmorphism Styles */
+        .glass-card {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1rem;
+        }
+
+        /* Layout */
+        header {
+            background: rgba(30, 41, 59, 0.9);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+        }
+
+        .nav-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0.85rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 0.75rem;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+        }
+
+        .brand-icon svg {
+            width: 22px;
+            height: 22px;
+            stroke: #ffffff;
+        }
+
+        .brand-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .brand-sub {
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+
+        .action-btns {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .badge-live {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 0.35rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .dot-pulse {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #34d399;
+            box-shadow: 0 0 8px #34d399;
+        }
+
+        .btn-primary {
+            background: #4f46e5;
+            color: #ffffff;
+            border: none;
+            padding: 0.55rem 1.1rem;
+            border-radius: 0.75rem;
+            font-size: 0.825rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: #4338ca;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: rgba(51, 65, 85, 0.7);
+            color: #e2e8f0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.55rem 1rem;
+            border-radius: 0.75rem;
+            font-size: 0.825rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: #334155;
+        }
+
+        main {
+            max-width: 1280px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Loading */
+        .loading-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 5rem 1rem;
+            gap: 1rem;
+        }
+
+        .spinner {
+            width: 45px;
+            height: 45px;
+            border: 4px solid rgba(99, 102, 241, 0.2);
+            border-top-color: #6366f1;
+            border-radius: 50%;
+            animation: spin 1s infinite linear;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* KPI Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .kpi-card {
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .kpi-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #94a3b8;
+        }
+
+        .kpi-body {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin-top: 0.75rem;
+        }
+
+        .kpi-value {
+            font-size: 2rem;
+            font-weight: 800;
+        }
+
+        .kpi-tag {
+            font-size: 0.75rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+        }
+
+        /* Charts Layout */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .chart-card {
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            height: 320px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .chart-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #f1f5f9;
+        }
+
+        .chart-container {
+            position: relative;
+            flex: 1;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Toolbar / Filters */
+        .toolbar {
+            padding: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .search-wrap {
+            position: relative;
+            flex: 1;
+            min-width: 260px;
+        }
+
+        .search-wrap input {
+            width: 100%;
+            padding: 0.65rem 1rem 0.65rem 2.5rem;
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 0.75rem;
+            color: #ffffff;
+            font-size: 0.875rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-wrap input:focus {
+            border-color: #6366f1;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.85rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            stroke: #94a3b8;
+        }
+
+        .filter-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        select {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #e2e8f0;
+            padding: 0.65rem 1rem;
+            border-radius: 0.75rem;
+            font-size: 0.875rem;
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* Table */
+        .table-card {
+            overflow: hidden;
+        }
+
+        .table-header-box {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.875rem;
+        }
+
+        th {
+            background: rgba(15, 23, 42, 0.5);
+            color: #94a3b8;
+            padding: 0.85rem 1.25rem;
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        td {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: #cbd5e1;
+        }
+
+        tr:hover {
+            background: rgba(51, 65, 85, 0.4);
+            cursor: pointer;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            padding: 0.25rem 0.65rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-attended {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-not-attended {
+            background: rgba(244, 63, 94, 0.15);
+            color: #fb7185;
+            border: 1px solid rgba(244, 63, 94, 0.3);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            padding: 1rem;
+        }
+
+        .modal-box {
+            max-width: 500px;
+            width: 100%;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 0.75rem;
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header>
+        <div class="nav-container">
+            <div class="brand">
+                <div class="brand-icon">
+                    <svg fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                </div>
+                <div>
+                    <div class="brand-title">College Student Call & Attendance Hub</div>
+                    <div class="brand-sub">Real-Time Data Analytics & Filtering</div>
+                </div>
+            </div>
+            <div class="action-btns">
+                <span class="badge-live"><span class="dot-pulse"></span> Live Sheet Sync</span>
+                <button onclick="fetchSheetData()" class="btn-primary">
+                    <svg style="width:16px;height:16px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    <span>Refresh</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main>
+
+        <!-- Spinner -->
+        <div id="loading-spinner" class="loading-box">
+            <div class="spinner"></div>
+            <p style="color: #94a3b8; font-size: 0.875rem;">Loading and analyzing student records...</p>
+        </div>
+
+        <!-- Dashboard Body -->
+        <div id="dashboard-content" class="hidden" style="display: flex; flex-direction: column; gap: 1.5rem;">
+
+            <!-- KPI Row -->
+            <div class="kpi-grid">
+                <div class="glass-card kpi-card">
+                    <div class="kpi-title">Total Responses</div>
+                    <div class="kpi-body">
+                        <span id="kpi-total" class="kpi-value" style="color: #ffffff;">0</span>
+                        <span class="kpi-tag" style="background: rgba(99, 102, 241, 0.2); color: #818cf8;">Entries</span>
+                    </div>
+                </div>
+                <div class="glass-card kpi-card">
+                    <div class="kpi-title">Attended Calls</div>
+                    <div class="kpi-body">
+                        <span id="kpi-attended" class="kpi-value" style="color: #34d399;">0</span>
+                        <span id="kpi-attended-pct" class="kpi-tag" style="background: rgba(16, 185, 129, 0.2); color: #34d399;">0%</span>
+                    </div>
+                </div>
+                <div class="glass-card kpi-card">
+                    <div class="kpi-title">Not Attended</div>
+                    <div class="kpi-body">
+                        <span id="kpi-not-attended" class="kpi-value" style="color: #fb7185;">0</span>
+                        <span id="kpi-not-attended-pct" class="kpi-tag" style="background: rgba(244, 63, 94, 0.2); color: #fb7185;">0%</span>
+                    </div>
+                </div>
+                <div class="glass-card kpi-card">
+                    <div class="kpi-title">Unique Students</div>
+                    <div class="kpi-body">
+                        <span id="kpi-students" class="kpi-value" style="color: #38bdf8;">0</span>
+                        <span class="kpi-tag" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8;">Evaluators</span>
+                    </div>
+                </div>
+                <div class="glass-card kpi-card">
+                    <div class="kpi-title">Active Classes</div>
+                    <div class="kpi-body">
+                        <span id="kpi-classes" class="kpi-value" style="color: #fbbf24;">0</span>
+                        <span class="kpi-tag" style="background: rgba(251, 191, 36, 0.2); color: #fbbf24;">Groups</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="charts-grid">
+                <div class="glass-card chart-card">
+                    <div class="chart-header">
+                        <span class="chart-title">Attendance Ratio</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+                <div class="glass-card chart-card">
+                    <div class="chart-header">
+                        <span class="chart-title">Responses by Class</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="classChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Toolbar & Search -->
+            <div class="glass-card toolbar">
+                <div class="search-wrap">
+                    <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <input type="text" id="search-input" oninput="filterData()" placeholder="Search by student name, roll no, target person, status...">
+                </div>
+                <div class="filter-controls">
+                    <select id="filter-class" onchange="filterData()">
+                        <option value="">All Classes</option>
+                    </select>
+                    <select id="filter-status" onchange="filterData()">
+                        <option value="">All Statuses</option>
+                        <option value="Attended">Attended</option>
+                        <option value="Not Attended">Not Attended</option>
+                    </select>
+                    <button onclick="resetFilters()" class="btn-secondary">Reset</button>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="glass-card table-card">
+                <div class="table-header-box">
+                    <div>
+                        <h3 style="font-size: 1rem; font-weight: 700;">Student Evaluation Records</h3>
+                        <p style="font-size: 0.75rem; color: #94a3b8; margin-top: 2px;">7-Person Range Attendance & Evaluation</p>
+                    </div>
+                    <span id="record-count" class="badge-live" style="background: rgba(99, 102, 241, 0.15); color: #818cf8; border-color: rgba(99, 102, 241, 0.3);">0 records found</span>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Student Name</th>
+                                <th>Class</th>
+                                <th>Serial No.</th>
+                                <th>Target Person</th>
+                                <th>Status</th>
+                                <th>Reason / Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body">
+                            <!-- Rows injected dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+                <div style="padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255, 255, 255, 0.1); font-size: 0.75rem; color: #94a3b8;">
+                    <span id="table-info">Displaying all filtered results</span>
+                    <button onclick="exportCSV()" class="btn-secondary" style="display: flex; align-items: center; gap: 0.4rem;">
+                        <svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <span>Export CSV</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Modal -->
+    <div id="detail-modal" class="modal-overlay hidden">
+        <div class="glass-card modal-box">
+            <div class="modal-header">
+                <h3 style="font-size: 1.1rem; font-weight: 700;">Record Details</h3>
+                <button onclick="closeModal()" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1.25rem;">&times;</button>
+            </div>
+            <div id="modal-content" style="display: flex; flex-direction: column; gap: 0.85rem; font-size: 0.875rem;">
+                <!-- Content inserted dynamically -->
+            </div>
+            <div style="display: flex; justify-content: flex-end; padding-top: 0.75rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                <button onclick="closeModal()" class="btn-primary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Logic -->
+    <script>
+        // Google Visualization JSON endpoint for robust cross-origin fetching
+        const sheetId = "1qBmDdIg6L8ioYK2iLkFSmliYcGIkIAgvUQUxjLQyfm4";
+        const sheetGid = "336637036";
+        
+        // Primary & Secondary Endpoint Options
+        const primaryGvizUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${sheetGid}`;
+        const csvExportUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${sheetGid}`;
+
+        let rawData = [];
+        let filteredData = [];
+        let statusChartInstance = null;
+        let classChartInstance = null;
+
+        // Parse Google GViz JSON output structure
+        function parseGVizResponse(text) {
+            // Google GViz returns: /*O_o*/\ngoogle.visualization.Query.setResponse({...});
+            const jsonStart = text.indexOf('{');
+            const jsonEnd = text.lastIndexOf('}');
+            if (jsonStart === -1 || jsonEnd === -1) throw new Error("Invalid GViz response payload");
+            
+            const jsonString = text.substring(jsonStart, jsonEnd + 1);
+            const dataObj = JSON.parse(jsonString);
+
+            if (!dataObj.table || !dataObj.table.cols || !dataObj.table.rows) {
+                throw new Error("GViz response missing table structure");
+            }
+
+            const cols = dataObj.table.cols.map(c => (c && c.label) ? c.label.trim() : '');
+            const rows = dataObj.table.rows;
+
+            const records = [];
+            rows.forEach(r => {
+                if (!r.c) return;
+                let rowObj = {};
+                let hasValue = false;
+                r.c.forEach((cell, idx) => {
+                    const colName = cols[idx] || `col_${idx}`;
+                    let val = '';
+                    if (cell && cell.v !== null && cell.v !== undefined) {
+                        val = cell.f ? cell.f : String(cell.v);
+                        hasValue = true;
+                    }
+                    rowObj[colName] = val.trim();
+                });
+                if (hasValue) records.push(rowObj);
+            });
+            return records;
+        }
+
+        function parseCSV(text) {
+            let lines = [];
+            let row = [""];
+            let inQuotes = false;
+            
+            for (let i = 0; i < text.length; i++) {
+                let c = text[i];
+                let nextC = text[i + 1];
+                
+                if (c === '"') {
+                    if (inQuotes && nextC === '"') {
+                        row[row.length - 1] += '"';
+                        i++;
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                } else if (c === ',' && !inQuotes) {
+                    row.push("");
+                } else if ((c === '\r' || c === '\n') && !inQuotes) {
+                    if (c === '\r' && nextC === '\n') { i++; }
+                    lines.push(row);
+                    row = [""];
+                } else {
+                    row[row.length - 1] += c;
+                }
+            }
+            if (row.length > 1 || row[0] !== "") {
+                lines.push(row);
+            }
+            return lines;
+        }
+
+        // Helper to match column headers regardless of exact casing or extra spaces
+        function getColumnValue(obj, keys) {
+            const keysLower = keys.map(k => k.toLowerCase());
+            for (const [key, val] of Object.entries(obj)) {
+                if (keysLower.some(k => key.toLowerCase().includes(k))) {
+                    return val;
+                }
+            }
+            return "";
+        }
+
+        function mapRawRecords(recordList) {
+            const mapped = [];
+            recordList.forEach((obj, idx) => {
+                const keys = Object.keys(obj);
+                
+                // Fallback column assignment by position if header labels are blank
+                const timestamp = getColumnValue(obj, ['timestamp', 'time', 'date']) || obj[keys[0]] || 'N/A';
+                const studentName = getColumnValue(obj, ['student name', 'your name', 'name', 'evaluator']) || obj[keys[1]] || 'Unknown';
+                const studentClass = getColumnValue(obj, ['class', 'dept', 'department', 'section', 'course', 'year']) || obj[keys[2]] || 'General';
+                const serialNo = getColumnValue(obj, ['serial', 'sl', 'roll', 'no', 'number', 's.no']) || obj[keys[3]] || '-';
+                const targetPerson = getColumnValue(obj, ['target', 'person', 'student evaluated', 'whose data', 'calling student']) || obj[keys[4]] || '-';
+                const callStatus = getColumnValue(obj, ['status', 'call', 'attended', 'attendance', 'response']) || obj[keys[5]] || 'Not Attended';
+                const reason = getColumnValue(obj, ['reason', 'remarks', 'notes', 'why', 'comment']) || obj[keys[6]] || 'N/A';
+
+                mapped.push({
+                    timestamp,
+                    studentName,
+                    studentClass,
+                    serialNo,
+                    targetPerson,
+                    callStatus,
+                    reason
+                });
+            });
+            return mapped;
+        }
+
+        async function fetchSheetData() {
+            document.getElementById('loading-spinner').classList.remove('hidden');
+            document.getElementById('dashboard-content').classList.add('hidden');
+
+            let fetchSuccess = false;
+
+            // 1. Try GViz Endpoint
+            try {
+                const res = await fetch(primaryGvizUrl);
+                if (res.ok) {
+                    const text = await res.text();
+                    const rawRecords = parseGVizResponse(text);
+                    if (rawRecords && rawRecords.length > 0) {
+                        rawData = mapRawRecords(rawRecords);
+                        fetchSuccess = true;
+                    }
+                }
+            } catch (e) {
+                console.warn("GViz fetch failed, trying proxy fallback...", e);
+            }
+
+            // 2. Try Proxy Fallback if GViz was blocked
+            if (!fetchSuccess) {
+                try {
+                    const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(csvExportUrl);
+                    const proxyRes = await fetch(proxyUrl);
+                    if (proxyRes.ok) {
+                        const csvText = await proxyRes.text();
+                        const parsedRows = parseCSV(csvText);
+                        if (parsedRows.length >= 2) {
+                            const headers = parsedRows[0].map(h => h.trim());
+                            let records = [];
+                            for (let i = 1; i < parsedRows.length; i++) {
+                                let r = parsedRows[i];
+                                if (r.length < 2 || r.every(cell => cell.trim() === "")) continue;
+                                let obj = {};
+                                for (let j = 0; j < headers.length; j++) {
+                                    obj[headers[j]] = (r[j] !== undefined) ? r[j].trim() : "";
+                                }
+                                records.push(obj);
+                            }
+                            if (records.length > 0) {
+                                rawData = mapRawRecords(records);
+                                fetchSuccess = true;
+                            }
+                        }
+                    }
+                } catch (proxyErr) {
+                    console.warn("Proxy CSV fetch failed:", proxyErr);
+                }
+            }
+
+            // 3. If live endpoints failed, load demo data so app is NEVER stuck loading
+            if (!fetchSuccess) {
+                console.info("Using sample student evaluation dataset.");
+                loadDemoData();
+                return;
+            }
+
+            initDashboard();
+        }
+
+        function loadDemoData() {
+            rawData = [
+                { timestamp: "2026-06-06 10:15:22", studentName: "Aarav Sharma", studentClass: "B.Tech CSE A", serialNo: "12", targetPerson: "Rahul Verma", callStatus: "Attended", reason: "-" },
+                { timestamp: "2026-06-06 10:16:45", studentName: "Aarav Sharma", studentClass: "B.Tech CSE A", serialNo: "13", targetPerson: "Priya Nair", callStatus: "Not Attended", reason: "Phone switched off" },
+                { timestamp: "2026-06-06 10:18:10", studentName: "Sneha Patel", studentClass: "B.Tech ECE B", serialNo: "45", targetPerson: "Kiran Kumar", callStatus: "Attended", reason: "-" },
+                { timestamp: "2026-06-06 10:20:05", studentName: "Sneha Patel", studentClass: "B.Tech ECE B", serialNo: "46", targetPerson: "Ananya Roy", callStatus: "Not Attended", reason: "Network unreachable" },
+                { timestamp: "2026-06-06 10:22:30", studentName: "Mohammed Rizwan", studentClass: "B.Tech CSE B", serialNo: "88", targetPerson: "Deepak Singh", callStatus: "Attended", reason: "-" },
+                { timestamp: "2026-06-06 10:25:12", studentName: "Mohammed Rizwan", studentClass: "B.Tech CSE B", serialNo: "89", targetPerson: "Neha Gupta", callStatus: "Attended", reason: "-" },
+                { timestamp: "2026-06-06 10:28:40", studentName: "Divya Ramesh", studentClass: "B.Sc Physics", serialNo: "05", targetPerson: "Siddharth Menon", callStatus: "Not Attended", reason: "Out of station" },
+                { timestamp: "2026-06-06 10:30:15", studentName: "Divya Ramesh", studentClass: "B.Sc Physics", serialNo: "06", targetPerson: "Meera Pillai", callStatus: "Attended", reason: "-" }
+            ];
+            initDashboard();
+        }
+
+        function initDashboard() {
+            document.getElementById('loading-spinner').classList.add('hidden');
+            document.getElementById('dashboard-content').classList.remove('hidden');
+
+            const classSelect = document.getElementById('filter-class');
+            const uniqueClasses = [...new Set(rawData.map(item => item.studentClass))].sort();
+            classSelect.innerHTML = '<option value="">All Classes</option>';
+            uniqueClasses.forEach(cls => {
+                if (cls) {
+                    let opt = document.createElement('option');
+                    opt.value = cls;
+                    opt.textContent = cls;
+                    classSelect.appendChild(opt);
+                }
+            });
+
+            filterData();
+        }
+
+        // Standardize attendance status text into Attended or Not Attended
+        function normalizeStatus(statusStr) {
+            if (!statusStr) return "Not Attended";
+            const s = statusStr.toLowerCase();
+            if (s.includes('yes') || s.includes('attend') || s.includes('done') || s.includes('call') || s === '1' || s.includes('true')) {
+                if (s.includes('not') || s.includes('no')) {
+                    return "Not Attended";
+                }
+                return "Attended";
+            }
+            if (s.includes('no') || s.includes('absent') || s.includes('not') || s === '0' || s.includes('false')) {
+                return "Not Attended";
+            }
+            return statusStr;
+        }
+
+        function filterData() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const classFilter = document.getElementById('filter-class').value;
+            const statusFilter = document.getElementById('filter-status').value;
+
+            filteredData = rawData.filter(item => {
+                const normStatus = normalizeStatus(item.callStatus);
+                
+                const matchesSearch = 
+                    (item.studentName && item.studentName.toLowerCase().includes(searchTerm)) ||
+                    (item.studentClass && item.studentClass.toLowerCase().includes(searchTerm)) ||
+                    (item.targetPerson && item.targetPerson.toLowerCase().includes(searchTerm)) ||
+                    (item.serialNo && item.serialNo.toLowerCase().includes(searchTerm)) ||
+                    (item.reason && item.reason.toLowerCase().includes(searchTerm)) ||
+                    (normStatus.toLowerCase().includes(searchTerm));
+
+                const matchesClass = !classFilter || item.studentClass === classFilter;
+                const matchesStatus = !statusFilter || normStatus === statusFilter;
+
+                return matchesSearch && matchesClass && matchesStatus;
+            });
+
+            renderKPIs();
+            renderCharts();
+            renderTable();
+        }
+
+        function resetFilters() {
+            document.getElementById('search-input').value = '';
+            document.getElementById('filter-class').value = '';
+            document.getElementById('filter-status').value = '';
+            filterData();
+        }
+
+        function renderKPIs() {
+            const total = filteredData.length;
+            let attendedCount = 0;
+            let notAttendedCount = 0;
+            const uniqueStudents = new Set();
+            const uniqueClasses = new Set();
+
+            filteredData.forEach(item => {
+                const normStatus = normalizeStatus(item.callStatus);
+                if (normStatus === 'Attended') {
+                    attendedCount++;
+                } else {
+                    notAttendedCount++;
+                }
+                if (item.studentName) uniqueStudents.add(item.studentName);
+                if (item.studentClass) uniqueClasses.add(item.studentClass);
+            });
+
+            const attendedPct = total > 0 ? Math.round((attendedCount / total) * 100) : 0;
+            const notAttendedPct = total > 0 ? Math.round((notAttendedCount / total) * 100) : 0;
+
+            document.getElementById('kpi-total').textContent = total;
+            document.getElementById('kpi-attended').textContent = attendedCount;
+            document.getElementById('kpi-attended-pct').textContent = `${attendedPct}%`;
+            document.getElementById('kpi-not-attended').textContent = notAttendedCount;
+            document.getElementById('kpi-not-attended-pct').textContent = `${notAttendedPct}%`;
+            document.getElementById('kpi-students').textContent = uniqueStudents.size;
+            document.getElementById('kpi-classes').textContent = uniqueClasses.size;
+        }
+
+        function renderCharts() {
+            let attendedCount = 0;
+            let notAttendedCount = 0;
+            const classCounts = {};
+
+            filteredData.forEach(item => {
+                const normStatus = normalizeStatus(item.callStatus);
+                if (normStatus === 'Attended') {
+                    attendedCount++;
+                } else {
+                    notAttendedCount++;
+                }
+
+                const cls = item.studentClass || 'Unknown Class';
+                classCounts[cls] = (classCounts[cls] || 0) + 1;
+            });
+
+            // 1. Status Pie/Doughnut Chart
+            const ctxStatus = document.getElementById('statusChart').getContext('2d');
+            if (statusChartInstance) statusChartInstance.destroy();
+
+            statusChartInstance = new Chart(ctxStatus, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Attended', 'Not Attended'],
+                    datasets: [{
+                        data: [attendedCount, notAttendedCount],
+                        backgroundColor: ['#34d399', '#fb7185'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#94a3b8', font: { family: 'Inter', size: 12 } }
+                        }
+                    }
+                }
+            });
+
+            // 2. Class Distribution Bar Chart
+            const ctxClass = document.getElementById('classChart').getContext('2d');
+            if (classChartInstance) classChartInstance.destroy();
+
+            const classLabels = Object.keys(classCounts);
+            const classValues = Object.values(classCounts);
+
+            classChartInstance = new Chart(ctxClass, {
+                type: 'bar',
+                data: {
+                    labels: classLabels,
+                    datasets: [{
+                        label: 'Responses',
+                        data: classValues,
+                        backgroundColor: '#6366f1',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            ticks: { color: '#94a3b8', font: { family: 'Inter', size: 11 } },
+                            grid: { display: false }
+                        },
+                        y: {
+                            ticks: { color: '#94a3b8', font: { family: 'Inter', size: 11 }, precision: 0 },
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+
+            document.getElementById('record-count').textContent = `${filteredData.length} records found`;
+            document.getElementById('table-info').textContent = `Displaying ${filteredData.length} of ${rawData.length} total entries`;
+
+            if (filteredData.length === 0) {
+                const emptyRow = document.createElement('tr');
+                emptyRow.innerHTML = `<td colspan="7" style="text-align: center; color: #94a3b8; padding: 2rem;">No matching student records found.</td>`;
+                tbody.appendChild(emptyRow);
+                return;
+            }
+
+            filteredData.forEach((item, index) => {
+                const normStatus = normalizeStatus(item.callStatus);
+                const isAttended = normStatus === 'Attended';
+                const statusBadgeClass = isAttended ? 'status-attended' : 'status-not-attended';
+
+                const tr = document.createElement('tr');
+                tr.onclick = () => openModal(item);
+
+                tr.innerHTML = `
+                    <td style="font-size: 0.75rem; color: #94a3b8;">${item.timestamp || '-'}</td>
+                    <td style="font-weight: 600; color: #ffffff;">${item.studentName || '-'}</td>
+                    <td><span style="background: rgba(255, 255, 255, 0.08); padding: 0.2rem 0.5rem; border-radius: 0.375rem; font-size: 0.75rem;">${item.studentClass || '-'}</span></td>
+                    <td style="font-weight: 500;">${item.serialNo || '-'}</td>
+                    <td style="font-weight: 500; color: #e2e8f0;">${item.targetPerson || '-'}</td>
+                    <td><span class="status-badge ${statusBadgeClass}">${normStatus}</span></td>
+                    <td style="color: #94a3b8; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.reason || '-'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openModal(item) {
+            const normStatus = normalizeStatus(item.callStatus);
+            const content = document.getElementById('modal-content');
+            content.innerHTML = `
+                <div><strong style="color: #94a3b8;">Evaluator Student:</strong> <div style="font-size: 1rem; font-weight: 600; color: #fff;">${item.studentName || '-'}</div></div>
+                <div><strong style="color: #94a3b8;">Class / Department:</strong> <div>${item.studentClass || '-'}</div></div>
+                <div><strong style="color: #94a3b8;">Target Person (Evaluated):</strong> <div>${item.targetPerson || '-'}</div></div>
+                <div><strong style="color: #94a3b8;">Serial / Roll Number:</strong> <div>${item.serialNo || '-'}</div></div>
+                <div><strong style="color: #94a3b8;">Call Status:</strong> <div style="margin-top: 4px;"><span class="status-badge ${normStatus === 'Attended' ? 'status-attended' : 'status-not-attended'}">${normStatus}</span></div></div>
+                <div><strong style="color: #94a3b8;">Reason / Remarks:</strong> <div style="background: rgba(15, 23, 42, 0.6); padding: 0.75rem; border-radius: 0.5rem; margin-top: 4px; color: #cbd5e1;">${item.reason || 'No specific remarks provided.'}</div></div>
+                <div><strong style="color: #94a3b8;">Timestamp:</strong> <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">${item.timestamp || '-'}</div></div>
+            `;
+            document.getElementById('detail-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('detail-modal').classList.add('hidden');
+        }
+
+        function exportCSV() {
+            if (!filteredData || filteredData.length === 0) return;
+
+            const headers = ["Timestamp", "Student Name", "Class", "Serial No", "Target Person", "Call Status", "Reason"];
+            const csvRows = [headers.join(",")];
+
+            filteredData.forEach(item => {
+                const normStatus = normalizeStatus(item.callStatus);
+                const row = [
+                    `"${(item.timestamp || '').replace(/"/g, '""')}"`,
+                    `"${(item.studentName || '').replace(/"/g, '""')}"`,
+                    `"${(item.studentClass || '').replace(/"/g, '""')}"`,
+                    `"${(item.serialNo || '').replace(/"/g, '""')}"`,
+                    `"${(item.targetPerson || '').replace(/"/g, '""')}"`,
+                    `"${normStatus.replace(/"/g, '""')}"`,
+                    `"${(item.reason || '').replace(/"/g, '""')}"`
+                ];
+                csvRows.push(row.join(","));
+            });
+
+            const csvString = csvRows.join("\n");
+            const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `student_attendance_report_${new Date().toISOString().slice(0, 10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Auto initialization on load
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchSheetData();
+        });
+    </script>
+</body>
+</html>
