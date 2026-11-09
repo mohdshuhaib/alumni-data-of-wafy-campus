@@ -929,8 +929,9 @@
 
         if (statusText) statusText.textContent = 'Syncing...';
 
-        const gvizUrl = `https://docs.google.com/spreadsheets/d/${this.sheetId}/gviz/tq?tqx=out:json&gid=${this.sheetGid}&t=${Date.now()}`;
+        const gvizUrl = `https://docs.google.com/spreadsheets/d/${this.sheetId}/gviz/tq?tqx=out:json&gid=${this.sheetGid}&headers=1&t=${Date.now()}`;
         const csvUrl = `https://docs.google.com/spreadsheets/d/${this.sheetId}/gviz/tq?tqx=out:csv&gid=${this.sheetGid}&t=${Date.now()}`;
+        const directExportCsvUrl = `https://docs.google.com/spreadsheets/d/${this.sheetId}/export?format=csv&gid=${this.sheetGid}`;
 
         let fetchedSuccessfully = false;
 
@@ -952,7 +953,16 @@
               fetchedSuccessfully = this.parseCsvData(csvText);
             }
           } catch (csvErr) {
-            console.warn('Direct CSV fetch failed:', csvErr);
+            console.warn('Direct CSV fetch failed, trying direct export...', csvErr);
+            try {
+              const resDirect = await fetch(directExportCsvUrl);
+              if (resDirect.ok) {
+                const csvText = await resDirect.text();
+                fetchedSuccessfully = this.parseCsvData(csvText);
+              }
+            } catch (dErr) {
+              console.warn('Direct export failed:', dErr);
+            }
           }
         }
 
@@ -994,16 +1004,46 @@
           const json = JSON.parse(match[1]);
           if (!json.table || !json.table.cols || !json.table.rows) return false;
 
-          const headers = json.table.cols.map((col, idx) => col.label || col.id || `Column ${idx + 1}`);
-          this.mapColumns(headers);
+          let headerRowOffset = 0;
+          let headers = json.table.cols.map((col, idx) => (col && col.label) ? col.label.trim() : '');
 
-          const records = [];
-          json.table.rows.forEach((r, rowIdx) => {
-            if (!r || !r.c) return;
-            const values = r.c.map(cell => (cell && cell.v !== null && cell.v !== undefined) ? String(cell.v).trim() : '');
-            if (values.every(v => v === '')) return;
-            records.push(this.createRecordFromRow(values, rowIdx));
-          });
+          // Check if GViz column labels are missing or just column letters (e.g., A, B, C...)
+          if (headers.filter(h => h.length > 0 && !/^[A-Z]+$/.test(h)).length < 2 && json.table.rows.length > 0) {
+            const firstRow = json.table.rows[0];
+            if (firstRow && firstRow.c) {
+              headers = firstRow.c.map((cell, idx) => {
+                if (!cell) return `Column ${idx + 1}`;
+                const val = (cell.v !== null && cell.v !== undefined) ? cell.v : (cell.f || '');
+                return String(val).trim() || `Column ${idx + 1}`;
+              });
+              headerRowOffset = 1;
+            }
+          } else {
+            headers = headers.map((h, idx) => h || `Column ${idx + 1}`);
+          }
+
+          // Extract all clean row values checking both raw (.v) and formatted (.f)
+          const rawRows = [];
+          for (let i = headerRowOffset; i < json.table.rows.length; i++) {
+            const r = json.table.rows[i];
+            if (!r || !r.c) continue;
+            const values = r.c.map(cell => {
+              if (!cell) return '';
+              if (cell.v !== null && cell.v !== undefined && String(cell.v).trim() !== '') {
+                return String(cell.v).trim();
+              }
+              if (cell.f !== null && cell.f !== undefined && String(cell.f).trim() !== '') {
+                return String(cell.f).trim();
+              }
+              return '';
+            });
+            if (values.every(v => v === '')) continue;
+            rawRows.push(values);
+          }
+
+          this.mapColumns(headers, rawRows);
+
+          const records = rawRows.map((vals, idx) => this.createRecordFromRow(vals, idx));
 
           if (records.length > 0) {
             this.rawRecords = records;
@@ -1022,16 +1062,19 @@
           if (lines.length < 2) return false;
 
           const headers = this.parseCsvRow(lines[0]);
-          this.mapColumns(headers);
 
-          const records = [];
+          const rawRows = [];
           for (let i = 1; i < lines.length; i++) {
             const line = lines[i].trim();
             if (!line) continue;
             const values = this.parseCsvRow(line);
             if (values.every(v => !v)) continue;
-            records.push(this.createRecordFromRow(values, i - 1));
+            rawRows.push(values);
           }
+
+          this.mapColumns(headers, rawRows);
+
+          const records = rawRows.map((vals, idx) => this.createRecordFromRow(vals, idx));
 
           if (records.length > 0) {
             this.rawRecords = records;
@@ -1095,51 +1138,110 @@
         return result;
       }
 
-      mapColumns(headers) {
+      mapColumns(headers, sampleRows = []) {
         this.headers = headers;
         const lowerHeaders = headers.map(h => (h || '').trim().toLowerCase());
 
-        const findCol = (predicate) => {
-          const idx = lowerHeaders.findIndex(predicate);
-          return idx !== -1 ? idx : null;
+        const findColPriority = (predicates) => {
+          for (const pred of predicates) {
+            const idx = lowerHeaders.findIndex(pred);
+            if (idx !== -1) return idx;
+          }
+          return null;
         };
 
-        this.detectedColumns.studentName = findCol(h => 
-          h.includes('student name') || h.includes('caller name') || h.includes('your name') || h === 'name' || h.includes('caller')
-        );
+        // 1. Precise Match for Status Column ("His Call Response")
+        let statusCol = findColPriority([
+          h => h === 'his call response' || h.replace(/[^a-z]/g, '') === 'hiscallresponse',
+          h => h.includes('his call response'),
+          h => h.includes('call response'),
+          h => h.includes('his response'),
+          h => h === 'call status' || h === 'response status'
+        ]);
 
-        this.detectedColumns.studentClass = findCol(h => 
-          h.includes('class') || h.includes('batch') || h.includes('department') || h.includes('course') || h.includes('year')
-        );
+        // Deep verification: Scan sample rows to find which column actually contains "call attended" or "call not attended"
+        if (sampleRows && sampleRows.length > 0) {
+          let bestCol = -1;
+          let maxHits = 0;
+          const colCount = headers.length;
+          for (let c = 0; c < colCount; c++) {
+            let hits = 0;
+            for (let r = 0; r < Math.min(sampleRows.length, 60); r++) {
+              const val = String(sampleRows[r][c] || '').toLowerCase().trim();
+              if (val === 'call attended' || val === 'call not attended' || val === 'attended' || val === 'not attended') {
+                hits++;
+              }
+            }
+            if (hits > maxHits) {
+              maxHits = hits;
+              bestCol = c;
+            }
+          }
+          if (bestCol !== -1 && maxHits > 0) {
+            statusCol = bestCol;
+          }
+        }
+        this.detectedColumns.status = statusCol;
 
-        this.detectedColumns.contactSerial = findCol(h => 
-          h.includes('serial') || h.includes('s.no') || h.includes('sno') || h.includes('slot') || h.includes('target') || h.includes('person number')
-        );
+        // 2. Remarks / Reason Column: "Any Remarks about his contact. (is he number wrong, switched off etc)"
+        this.detectedColumns.notAttendedReason = findColPriority([
+          h => h.includes('remarks about his contact') || h.includes('is he number wrong') || h.includes('switched off'),
+          h => h.includes('remarks') && !h.includes('name'),
+          h => h.includes('reason') && !h.includes('name'),
+          h => h.includes('why not attended')
+        ]);
 
-        this.detectedColumns.contactName = findCol((h, idx) => 
-          (h.includes('person') || h.includes('contact') || h.includes('candidate') || h.includes('whom')) && 
-          idx !== this.detectedColumns.studentName
-        );
+        // 3. Student / Caller Name
+        this.detectedColumns.studentName = findColPriority([
+          h => h.includes('student name') || h.includes('caller name'),
+          h => h.includes('your name'),
+          h => h === 'name' || h === 'student',
+          h => h.includes('caller')
+        ]);
 
-        this.detectedColumns.status = findCol(h => 
-          h.includes('his call response') || h.includes('call response') || h.includes('response') || h.includes('status') || h.includes('attended')
-        );
+        // 4. Student Class / Batch
+        this.detectedColumns.studentClass = findColPriority([
+          h => h.includes('student class') || h.includes('your class') || h.includes('class / batch') || h === 'class',
+          h => h.includes('class') || h.includes('batch'),
+          h => h.includes('department') || h.includes('course') || h.includes('branch')
+        ]);
 
-        this.detectedColumns.notAttendedReason = findCol(h => 
-          h.includes('remarks about his contact') || h.includes('is he number wrong') || h.includes('switched off') || h.includes('reason') || h.includes('remarks')
-        );
+        // 5. Contact Serial Number (1 to 7)
+        this.detectedColumns.contactSerial = findColPriority([
+          h => h.includes('serial number') || h.includes('s.no') || h.includes('sno') || h.includes('serial'),
+          h => h.includes('slot') || h.includes('1 to 7') || h.includes('person number')
+        ]);
 
-        this.detectedColumns.cvLink = findCol(h => 
-          h.includes('upload cv') || h.includes('cv') || h.includes('resume') || h.includes('drive')
+        // 6. Contact / Target Person Name (Must not be the student's name)
+        let contactCol = lowerHeaders.findIndex((h, idx) => 
+          idx !== this.detectedColumns.studentName &&
+          (h.includes('target person') || h.includes('contact person') || h.includes('candidate name') || h.includes('person name'))
         );
+        if (contactCol === -1) {
+          contactCol = lowerHeaders.findIndex((h, idx) => 
+            idx !== this.detectedColumns.studentName &&
+            idx !== this.detectedColumns.notAttendedReason &&
+            (h.includes('candidate') || h.includes('whom') || (h.includes('person') && !h.includes('serial')))
+          );
+        }
+        this.detectedColumns.contactName = contactCol !== -1 ? contactCol : null;
 
-        this.detectedColumns.phone = findCol(h => 
-          h.includes('phone') || h.includes('mobile') || h.includes('contact no') || h.includes('number')
-        );
+        // 7. Upload CV
+        this.detectedColumns.cvLink = findColPriority([
+          h => h.includes('upload cv') || h.includes('cv') || h.includes('resume'),
+          h => h.includes('drive link') || h.includes('pdf')
+        ]);
 
-        this.detectedColumns.timestamp = findCol(h => 
-          h.includes('timestamp') || h.includes('time') || h.includes('date')
-        );
+        // 8. Contact Phone Number
+        this.detectedColumns.phone = findColPriority([
+          h => h.includes('phone') || h.includes('mobile') || h.includes('contact no') || h.includes('contact number'),
+          h => h.includes('number') && !h.includes('serial') && !h.includes('wrong')
+        ]);
+
+        // 9. Timestamp
+        this.detectedColumns.timestamp = findColPriority([
+          h => h.includes('timestamp') || h.includes('date') || h.includes('time')
+        ]);
       }
 
       createRecordFromRow(values, index) {
@@ -1164,23 +1266,42 @@
         const phone = getVal(this.detectedColumns.phone) || 'Contact Number N/A';
         const timestamp = getVal(this.detectedColumns.timestamp) || new Date().toLocaleDateString();
 
-        // Specific mapping to His Call Response: Call Attended vs Call Not Attended
-        const rawResponse = getVal(this.detectedColumns.status);
-        const lowerResp = rawResponse.toLowerCase();
+        // ----------------- ACCURATE ATTENDED VS NOT ATTENDED RESOLUTION -----------------
+        let rawResponse = getVal(this.detectedColumns.status);
+        let normResp = rawResponse.toLowerCase().trim();
+
+        // If the designated status column was empty or did not contain "attended", scan the entire row as a safety net
+        if (!normResp.includes('attended') && !normResp.includes('not attended')) {
+          for (let i = 0; i < values.length; i++) {
+            const cellText = String(values[i] || '').toLowerCase().trim();
+            if (cellText === 'call attended' || cellText === 'call not attended' || cellText === 'attended' || cellText === 'not attended') {
+              rawResponse = values[i];
+              normResp = cellText;
+              break;
+            }
+          }
+        }
 
         let isAttended = false;
-        if (lowerResp.includes('attended') && !lowerResp.includes('not')) {
-          isAttended = true;
-        } else if (lowerResp.includes('not attended') || lowerResp.includes('not answered')) {
+
+        // Check for NOT ATTENDED first to avoid false positives
+        if (normResp.includes('not attended') || normResp.includes('not_attended') || normResp.includes('not answered') || normResp === 'unattended') {
           isAttended = false;
-        } else if (lowerResp.includes('yes') || lowerResp.includes('connected')) {
+        } 
+        // Then check for ATTENDED
+        else if (normResp.includes('attended') || normResp === 'call attended' || normResp === 'yes' || normResp === 'connected') {
           isAttended = true;
-        } else {
-          const remarksVal = getVal(this.detectedColumns.notAttendedReason);
-          if (remarksVal && remarksVal !== '-' && remarksVal.length > 2) {
+        } 
+        // Fallback: check remarks column for non-attended reasons
+        else {
+          const remarksVal = getVal(this.detectedColumns.notAttendedReason).toLowerCase();
+          const failureKeywords = ['switched off', 'ringing', 'wrong number', 'busy', 'cut', 'not reachable', 'declined', 'unanswered', 'out of coverage'];
+          if (failureKeywords.some(kw => remarksVal.includes(kw))) {
             isAttended = false;
           } else {
-            isAttended = true;
+            // Check if there is CV link or feedback text
+            const hasDrive = values.some(v => typeof v === 'string' && (v.includes('drive.google.com') || v.includes('.pdf')));
+            isAttended = hasDrive;
           }
         }
 
@@ -1188,16 +1309,16 @@
 
         // Remarks about his contact
         const remarks = getVal(this.detectedColumns.notAttendedReason) || (isAttended ? '-' : 'Call Not Answered');
-        const notAttendedReason = isAttended ? '-' : remarks;
+        const notAttendedReason = isAttended ? '-' : (remarks !== '-' ? remarks : 'Not Answered / Unspecified');
 
         // Upload CV
         let cvLink = getVal(this.detectedColumns.cvLink);
         if (!cvLink || !cvLink.startsWith('http')) {
-          const driveCol = values.find(v => typeof v === 'string' && (v.includes('drive.google.com') || v.includes('.pdf')));
+          const driveCol = values.find(v => typeof v === 'string' && (v.includes('drive.google.com') || v.includes('.pdf') || v.includes('docs.google.com')));
           if (driveCol) cvLink = driveCol;
         }
 
-        // Attended data preview
+        // Attended data preview: for attended calls, pick the first meaningful field
         let attendedData = '-';
         if (isAttended) {
           const skipIndices = new Set([
@@ -1207,7 +1328,9 @@
             this.detectedColumns.contactName,
             this.detectedColumns.status,
             this.detectedColumns.phone,
-            this.detectedColumns.timestamp
+            this.detectedColumns.timestamp,
+            this.detectedColumns.notAttendedReason,
+            this.detectedColumns.cvLink
           ]);
           for (let i = 0; i < values.length; i++) {
             if (!skipIndices.has(i) && values[i] && values[i] !== '-' && !values[i].startsWith('http')) {
@@ -1220,7 +1343,7 @@
 
         const allColumns = this.headers.map((hdr, cIdx) => ({
           header: hdr || `Field ${cIdx + 1}`,
-          value: values[cIdx] || '-'
+          value: (values[cIdx] !== undefined && values[cIdx] !== null && String(values[cIdx]).trim() !== '') ? String(values[cIdx]).trim() : '-'
         }));
 
         return {
@@ -1231,7 +1354,7 @@
           contactName,
           phone,
           status,
-          rawStatus: rawResponse || (isAttended ? 'Call Attended' : 'Call Not Attended'),
+          rawStatus: isAttended ? 'Call Attended' : 'Call Not Attended',
           attendedData,
           notAttendedReason,
           remarks,
@@ -1254,7 +1377,6 @@
           'Any Remarks about his contact. (is he number wrong, switched off etc)',
           'Upload CV'
         ];
-        this.mapColumns(this.headers);
 
         const students = [
           { name: 'Rahul Sharma', cls: 'B.Tech CSE - Final Year' },
@@ -1275,7 +1397,7 @@
           'Requested Callback Later'
         ];
 
-        const records = [];
+        const rawRows = [];
         let rowId = 1;
 
         students.forEach((stud, sIdx) => {
@@ -1299,12 +1421,13 @@
               cv
             ];
 
-            records.push(this.createRecordFromRow(values, rowId - 1));
+            rawRows.push(values);
             rowId++;
           }
         });
 
-        this.rawRecords = records;
+        this.mapColumns(this.headers, rawRows);
+        this.rawRecords = rawRows.map((vals, idx) => this.createRecordFromRow(vals, idx));
         this.populateFilterDropdowns();
         this.applyFilters();
       }
@@ -1835,15 +1958,15 @@
           const pct = Math.min(100, Math.round((completedCount / target) * 100));
           const isDone = completedCount >= target;
 
-          // Badges for 1 to 7 call indicators
+          // Badges for 1 to 7 call indicators (Green for Attended, Red for Not Attended)
           let slotsHtml = '';
           for (let i = 1; i <= 7; i++) {
-            const call = student.records.find(r => String(r.contactSerial) === String(i)) || student.records[i - 1];
+            const call = student.records.find(r => parseInt(r.contactSerial, 10) === i) || student.records[i - 1];
             if (call) {
               const isAttended = call.status === 'ATTENDED';
               slotsHtml += `
-                <div title="Call #${i}: ${isAttended ? 'Attended' : 'Not Attended (' + call.notAttendedReason + ')'}" 
-                     class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold cursor-pointer transition ${isAttended ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}">
+                <div title="Call Slot #${i}: ${isAttended ? 'Call Attended' : 'Call Not Attended (' + call.notAttendedReason + ')'}" 
+                     class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold cursor-pointer transition shadow-sm ${isAttended ? 'bg-emerald-500 text-white hover:bg-emerald-600' : 'bg-rose-500 text-white hover:bg-rose-600'}">
                   ${i}
                 </div>
               `;
@@ -1887,8 +2010,9 @@
 
               <!-- Action footer -->
               <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                <span class="text-[11px] text-slate-400">
-                  ${student.records.filter(r => r.status === 'ATTENDED').length} attended
+                <span class="text-[11px] text-slate-500 font-medium">
+                  <strong class="text-emerald-600 font-bold">${student.records.filter(r => r.status === 'ATTENDED').length}</strong> attended, 
+                  <strong class="text-rose-600 font-bold">${student.records.filter(r => r.status === 'NOT_ATTENDED').length}</strong> unanswered
                 </span>
                 <button onclick="app.openStudentModal('${student.name.replace(/'/g, "\\'")}')" class="text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1">
                   View Call Log <i class="fa-solid fa-arrow-right text-[10px]"></i>
