@@ -808,28 +808,30 @@
         // Standardize attendance status text into Attended or Not Attended
         function normalizeStatus(statusStr) {
             if (!statusStr) return "Not Attended";
-            const s = statusStr.toLowerCase();
-            if (s.includes('yes') || s.includes('attend') || s.includes('done') || s.includes('call') || s === '1' || s.includes('true')) {
-                if (s.includes('not') || s.includes('no')) {
-                    return "Not Attended";
-                }
-                return "Attended";
-            }
-            if (s.includes('no') || s.includes('absent') || s.includes('not') || s === '0' || s.includes('false')) {
+            const s = String(statusStr).trim().toLowerCase();
+
+            // Explicit checks for "Not Attended" negative indicators
+            if (s.includes('not attended') || s.includes('not done') || s.includes('absent') || s.includes('unreachable') || s.includes('no answer') || s === 'no' || s === '0' || s === 'false') {
                 return "Not Attended";
             }
-            return statusStr;
+
+            // Checks for positive attendance indicators
+            if (s.includes('attended') || s.includes('present') || s.includes('done') || s.includes('called') || s.includes('joined') || s === 'yes' || s === '1' || s === 'true' || s === 'ok') {
+                return "Attended";
+            }
+
+            return statusStr.trim();
         }
 
         function filterData() {
-            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
             const classFilter = document.getElementById('filter-class').value;
             const statusFilter = document.getElementById('filter-status').value;
 
             filteredData = rawData.filter(item => {
                 const normStatus = normalizeStatus(item.callStatus);
                 
-                const matchesSearch = 
+                const matchesSearch = !searchTerm || 
                     (item.studentName && item.studentName.toLowerCase().includes(searchTerm)) ||
                     (item.studentClass && item.studentClass.toLowerCase().includes(searchTerm)) ||
                     (item.targetPerson && item.targetPerson.toLowerCase().includes(searchTerm)) ||
@@ -838,7 +840,14 @@
                     (normStatus.toLowerCase().includes(searchTerm));
 
                 const matchesClass = !classFilter || item.studentClass === classFilter;
-                const matchesStatus = !statusFilter || normStatus === statusFilter;
+                
+                // Status Filter matching
+                let matchesStatus = true;
+                if (statusFilter === 'Attended') {
+                    matchesStatus = normStatus === 'Attended';
+                } else if (statusFilter === 'Not Attended') {
+                    matchesStatus = normStatus === 'Not Attended';
+                }
 
                 return matchesSearch && matchesClass && matchesStatus;
             });
@@ -855,165 +864,35 @@
             filterData();
         }
 
-        function renderKPIs() {
-            const total = filteredData.length;
-            let attendedCount = 0;
-            let notAttendedCount = 0;
-            const uniqueStudents = new Set();
-            const uniqueClasses = new Set();
-
-            filteredData.forEach(item => {
-                const normStatus = normalizeStatus(item.callStatus);
-                if (normStatus === 'Attended') {
-                    attendedCount++;
-                } else {
-                    notAttendedCount++;
-                }
-                if (item.studentName) uniqueStudents.add(item.studentName);
-                if (item.studentClass) uniqueClasses.add(item.studentClass);
-            });
-
-            const attendedPct = total > 0 ? Math.round((attendedCount / total) * 100) : 0;
-            const notAttendedPct = total > 0 ? Math.round((notAttendedCount / total) * 100) : 0;
-
-            document.getElementById('kpi-total').textContent = total;
-            document.getElementById('kpi-attended').textContent = attendedCount;
-            document.getElementById('kpi-attended-pct').textContent = `${attendedPct}%`;
-            document.getElementById('kpi-not-attended').textContent = notAttendedCount;
-            document.getElementById('kpi-not-attended-pct').textContent = `${notAttendedPct}%`;
-            document.getElementById('kpi-students').textContent = uniqueStudents.size;
-            document.getElementById('kpi-classes').textContent = uniqueClasses.size;
-        }
-
-        function renderCharts() {
-            let attendedCount = 0;
-            let notAttendedCount = 0;
-            const classCounts = {};
-
-            filteredData.forEach(item => {
-                const normStatus = normalizeStatus(item.callStatus);
-                if (normStatus === 'Attended') {
-                    attendedCount++;
-                } else {
-                    notAttendedCount++;
-                }
-
-                const cls = item.studentClass || 'Unknown Class';
-                classCounts[cls] = (classCounts[cls] || 0) + 1;
-            });
-
-            // 1. Status Pie/Doughnut Chart
-            const ctxStatus = document.getElementById('statusChart').getContext('2d');
-            if (statusChartInstance) statusChartInstance.destroy();
-
-            statusChartInstance = new Chart(ctxStatus, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Attended', 'Not Attended'],
-                    datasets: [{
-                        data: [attendedCount, notAttendedCount],
-                        backgroundColor: ['#34d399', '#fb7185'],
-                        borderWidth: 0,
-                        hoverOffset: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: { color: '#94a3b8', font: { family: 'Inter', size: 12 } }
-                        }
-                    }
-                }
-            });
-
-            // 2. Class Distribution Bar Chart
-            const ctxClass = document.getElementById('classChart').getContext('2d');
-            if (classChartInstance) classChartInstance.destroy();
-
-            const classLabels = Object.keys(classCounts);
-            const classValues = Object.values(classCounts);
-
-            classChartInstance = new Chart(ctxClass, {
-                type: 'bar',
-                data: {
-                    labels: classLabels,
-                    datasets: [{
-                        label: 'Responses',
-                        data: classValues,
-                        backgroundColor: '#6366f1',
-                        borderRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: {
-                            ticks: { color: '#94a3b8', font: { family: 'Inter', size: 11 } },
-                            grid: { display: false }
-                        },
-                        y: {
-                            ticks: { color: '#94a3b8', font: { family: 'Inter', size: 11 }, precision: 0 },
-                            grid: { color: 'rgba(255, 255, 255, 0.05)' }
-                        }
-                    },
-                    plugins: {
-                        legend: { display: false }
-                    }
-                }
-            });
-        }
-
-        function renderTable() {
-            const tbody = document.getElementById('table-body');
-            tbody.innerHTML = '';
-
-            document.getElementById('record-count').textContent = `${filteredData.length} records found`;
-            document.getElementById('table-info').textContent = `Displaying ${filteredData.length} of ${rawData.length} total entries`;
-
-            if (filteredData.length === 0) {
-                const emptyRow = document.createElement('tr');
-                emptyRow.innerHTML = `<td colspan="7" style="text-align: center; color: #94a3b8; padding: 2rem;">No matching student records found.</td>`;
-                tbody.appendChild(emptyRow);
-                return;
-            }
-
-            filteredData.forEach((item, index) => {
-                const normStatus = normalizeStatus(item.callStatus);
-                const isAttended = normStatus === 'Attended';
-                const statusBadgeClass = isAttended ? 'status-attended' : 'status-not-attended';
-
-                const tr = document.createElement('tr');
-                tr.onclick = () => openModal(item);
-
-                tr.innerHTML = `
-                    <td style="font-size: 0.75rem; color: #94a3b8;">${item.timestamp || '-'}</td>
-                    <td style="font-weight: 600; color: #ffffff;">${item.studentName || '-'}</td>
-                    <td><span style="background: rgba(255, 255, 255, 0.08); padding: 0.2rem 0.5rem; border-radius: 0.375rem; font-size: 0.75rem;">${item.studentClass || '-'}</span></td>
-                    <td style="font-weight: 500;">${item.serialNo || '-'}</td>
-                    <td style="font-weight: 500; color: #e2e8f0;">${item.targetPerson || '-'}</td>
-                    <td><span class="status-badge ${statusBadgeClass}">${normStatus}</span></td>
-                    <td style="color: #94a3b8; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${item.reason || '-'}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
         function openModal(item) {
             const normStatus = normalizeStatus(item.callStatus);
             const content = document.getElementById('modal-content');
-            content.innerHTML = `
-                <div><strong style="color: #94a3b8;">Evaluator Student:</strong> <div style="font-size: 1rem; font-weight: 600; color: #fff;">${item.studentName || '-'}</div></div>
-                <div><strong style="color: #94a3b8;">Class / Department:</strong> <div>${item.studentClass || '-'}</div></div>
-                <div><strong style="color: #94a3b8;">Target Person (Evaluated):</strong> <div>${item.targetPerson || '-'}</div></div>
-                <div><strong style="color: #94a3b8;">Serial / Roll Number:</strong> <div>${item.serialNo || '-'}</div></div>
-                <div><strong style="color: #94a3b8;">Call Status:</strong> <div style="margin-top: 4px;"><span class="status-badge ${normStatus === 'Attended' ? 'status-attended' : 'status-not-attended'}">${normStatus}</span></div></div>
-                <div><strong style="color: #94a3b8;">Reason / Remarks:</strong> <div style="background: rgba(15, 23, 42, 0.6); padding: 0.75rem; border-radius: 0.5rem; margin-top: 4px; color: #cbd5e1;">${item.reason || 'No specific remarks provided.'}</div></div>
-                <div><strong style="color: #94a3b8;">Timestamp:</strong> <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">${item.timestamp || '-'}</div></div>
-            `;
+
+            // Render all raw keys and values available for the clicked record
+            let fullDetailsHtml = '';
+            if (item._raw) {
+                for (const [key, val] of Object.entries(item._raw)) {
+                    if (!key) continue;
+                    fullDetailsHtml += `
+                        <div style="padding: 0.5rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                            <strong style="color: #94a3b8; font-size: 0.75rem; text-transform: uppercase;">${key}:</strong>
+                            <div style="color: #e2e8f0; margin-top: 2px;">${val || '-'}</div>
+                        </div>
+                    `;
+                }
+            } else {
+                fullDetailsHtml = `
+                    <div><strong style="color: #94a3b8;">Evaluator Student:</strong> <div style="font-size: 1rem; font-weight: 600; color: #fff;">${item.studentName || '-'}</div></div>
+                    <div><strong style="color: #94a3b8;">Class / Department:</strong> <div>${item.studentClass || '-'}</div></div>
+                    <div><strong style="color: #94a3b8;">Target Person (Evaluated):</strong> <div>${item.targetPerson || '-'}</div></div>
+                    <div><strong style="color: #94a3b8;">Serial / Roll Number:</strong> <div>${item.serialNo || '-'}</div></div>
+                    <div><strong style="color: #94a3b8;">Call Status:</strong> <div style="margin-top: 4px;"><span class="status-badge ${normStatus === 'Attended' ? 'status-attended' : 'status-not-attended'}">${normStatus}</span></div></div>
+                    <div><strong style="color: #94a3b8;">Reason / Remarks:</strong> <div style="background: rgba(15, 23, 42, 0.6); padding: 0.75rem; border-radius: 0.5rem; margin-top: 4px; color: #cbd5e1;">${item.reason || 'No specific remarks provided.'}</div></div>
+                    <div><strong style="color: #94a3b8;">Timestamp:</strong> <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">${item.timestamp || '-'}</div></div>
+                `;
+            }
+
+            content.innerHTML = fullDetailsHtml;
             document.getElementById('detail-modal').classList.remove('hidden');
         }
 
